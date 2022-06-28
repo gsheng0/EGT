@@ -30,7 +30,6 @@ export class Template{
         let fields = [];
         for(let i = 0; i < template.length; i++){
             let fieldsFromLine = this.getFieldsFromLine(template[i]);
-            console.log("Fields from line: " + fieldsFromLine);
             for(let x = 0; x < fieldsFromLine.length; x++){
                 if(!fields.includes(fieldsFromLine[x])){ //checks to see if the field already exists in the list
                     fields.push(fieldsFromLine[x]);

@@ -28,7 +28,7 @@ function setupCreatePage(){
     templateFileInputElement.onchange = function(event){
         const reader = new FileReader();
         reader.onload = function(){
-            loadTemplate(reader.result);
+            loadTemplate(reader.result.split("\n"));
         }
         reader.readAsText(templateFileInputElement.files[0]);
     }
@@ -45,11 +45,14 @@ function setupPreviewPage(){
 //puts a bunch of text boxes and labels into the left container
 //a preview in the right container
 function loadTemplate(textContent){
+    for(let i = 0; i < 2; i++){
+    leftContainer.appendChild(General.lineBreak());}
+
     let template = new Template(textContent);
     let textBoxes = [];
     for(let i = 0; i < template.fields.length; i++){
         let textBox = General.textInputElement("");
-        textBoxes.appendChild(textBox);
+        textBoxes.push(textBox);
         let textLabel = General.textElement("h4", template.fields[i]);
         leftContainer.appendChild(textLabel);
         leftContainer.appendChild(textBox);
