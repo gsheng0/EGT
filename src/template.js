@@ -1,5 +1,36 @@
+export class FieldInformation{
+
+    //id: Field Id/name
+    //sortOrder: integer
+    //question: the string containing the question to be used to prompt the user
+    constructor(id, sortOrder, question, inputType){
+        this.id = id;
+        this.sortOrder = sortOrder;
+        this.question = question;
+        this.inputType = inputType;
+
+    }
+}
+
 
 export class Template{
+
+    //id: Template id (string)
+    //title: Template title (string)
+    //desc: Template description (string)
+    //questions: List of FieldInformation representing different fields of the template
+    //body: A TemplateBody representing the body of the email
+    //  contains information on where the fields should go within the email itself and contains the static elements of the email to be generated
+    constructor(id, title, desc, questions, body){
+        this.id = id;
+        this.title = title;
+        this.desc = desc;
+        this.questions = questions;
+        this.body = body;
+    }
+}
+
+export class TemplateBody{
     //template: list of strings representing the email
     //  first line is the subject
     //fields: list of strings representing the fields that can be filled out for the email

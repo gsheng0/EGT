@@ -5,6 +5,65 @@ export class General{
         }
     }
 
+    
+
+    static carouselContainer(){
+        let container = document.createElement("div");
+        container.classList.add("carousel");
+        container.classList.add("slide");
+        container.setAttribute("data-bs-ride", "carousel");
+        return container;
+    }
+
+    static carouselItemContainer(){
+        let container = document.createElement("div");
+        container.classList.add("carousel-inner");
+        return container;
+    }
+
+    static carouselItem(title, captionTitle, caption){
+        let container = document.createElement("div");
+        container.classList.add("carousel-item");
+        container.appendChild(General.carouselItemTitle(title));
+        container.appendChild(General.carouselItemCaption(captionTitle, caption));
+        return container;
+    }
+
+    static carouselItemTitle(title){
+        let container = document.createElement("div");
+        container.classList.add("container");
+        container.classList.add("border");
+        let titleElement = document.createElement("h3", title);
+        titleElement.classList.add("text-center");
+        container.appendChild(titleElement);
+        container.style = "height: 500px; width: 800px";
+        return container;
+    }
+
+    static carouselItemCaption(captionTitle, caption){
+        let container = document.createElement("div");
+        container.classList.add("carousel-caption");
+        container.classList.add("d-none");
+        container.classList.add("d-md-block");
+        container.append(General.textElement("h5", captionTitle));
+        container.append(General.textElement("p", caption));
+        return container;
+    }
+
+    static carouselIndicatorContainer(){
+        let container = document.createElement("div");
+        container.classList.add("carousel-indicators");
+        return container;
+    }
+
+    static carouselIndicatorButton(carouselIndicatorContainerId, itemIndex){
+        let button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("data-bs-target", "#" + carouselIndicatorContainerId);
+        button.setAttribute("data-bs-slide-to", "" + itemIndex);
+        return button;
+    }
+
     static lineBreak() { 
         return document.createElement("br");
     }
@@ -39,6 +98,13 @@ export class General{
         let input = document.createElement("input");
         input.classList.add("form-control");
         input.placeholder = placeHolder;
+        return input;
+    }
+
+    static textAreaInputElement(placeHolder){
+        let input = document.createElement("textarea");
+        input.classList.add("form-control");
+        input.placeHolder = placeHolder;
         return input;
     }
 
