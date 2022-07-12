@@ -5,8 +5,6 @@ export class General{
         }
     }
 
-    
-
     static carouselContainer(){
         let container = document.createElement("div");
         container.classList.add("carousel");
@@ -33,10 +31,11 @@ export class General{
         let container = document.createElement("div");
         container.classList.add("container");
         container.classList.add("border");
-        let titleElement = document.createElement("h3", title);
+        let titleElement = document.createElement("h3");
+        titleElement.textContent = title;
         titleElement.classList.add("text-center");
         container.appendChild(titleElement);
-        container.style = "height: 500px; width: 800px";
+        container.style = "height: 500px; width: 800px; padding-top: 20px;";
         return container;
     }
 
@@ -45,6 +44,7 @@ export class General{
         container.classList.add("carousel-caption");
         container.classList.add("d-none");
         container.classList.add("d-md-block");
+        container.style = "color: black;"
         container.append(General.textElement("h5", captionTitle));
         container.append(General.textElement("p", caption));
         return container;
@@ -62,6 +62,35 @@ export class General{
         button.setAttribute("data-bs-target", "#" + carouselIndicatorContainerId);
         button.setAttribute("data-bs-slide-to", "" + itemIndex);
         return button;
+    }
+
+    static addCarouselControlButtons(carouselContainer){
+        let previousButton = document.createElement("button");
+        let nextButton = document.createElement("button");
+        previousButton.classList.add("carousel-control-prev");
+        previousButton.type = "button";
+        previousButton.setAttribute("data-bs-target", "#" + carouselContainer.id);
+        previousButton.setAttribute("data-bs-slide", "prev");
+
+        nextButton.classList.add("carousel-control-next");
+        nextButton.type = "button";
+        nextButton.setAttribute("data-bs-target", "#" + carouselContainer.id);
+        nextButton.setAttribute("data-bs-slide", "next");
+
+        let previousButtonIcon = document.createElement("span");
+        let nextButtonIcon = document.createElement("span");
+
+        previousButtonIcon.classList.add("carousel-control-prev-icon");
+        previousButtonIcon.setAttribute("aria-hidden", "true");
+
+        nextButtonIcon.classList.add("carousel-control-next-icon");
+        nextButtonIcon.setAttribute("aria-hidden", "true");
+
+        previousButton.appendChild(previousButtonIcon);
+        nextButton.appendChild(nextButtonIcon);
+
+        carouselContainer.appendChild(previousButton);
+        carouselContainer.appendChild(nextButton);
     }
 
     static lineBreak() { 
@@ -197,5 +226,46 @@ export class General{
                 window.URL.revokeObjectURL(url);  
             }, 0); 
         }
+    }
+}
+
+export class Carousel{
+    //titles: list of strings
+    //captionsTitles: list of strings
+    //captions: list of strings
+    //All lists should be the same length
+    constructor(titles, captionTitles, captions){
+        this.titles = titles;
+        this.captionTitles = captionTitles;
+        this.captions = captions;
+    }
+
+    makeCarousel(id){
+        let carouselLength = Math.min(this.titles.length, Math.min(this.captionTitles.length, this.captions.length));
+        if(carouselLength < 1){
+            return document.createElement("div");
+        }
+        let carouselContainer = General.carouselContainer();
+        carouselContainer.id = id;
+        let indicatorContainer = General.carouselIndicatorContainer();
+        
+        indicatorContainer.id = "indicator-container";
+        let firstIndicator = General.carouselIndicatorButton(id, 0);
+        firstIndicator.classList.add("active");
+        indicatorContainer.appendChild(firstIndicator);
+        for(let i = 1; i < carouselLength; i++){
+            indicatorContainer.appendChild(General.carouselIndicatorButton(id, i));
+        }
+        let carouselItemContainer = General.carouselItemContainer();
+        let firstItem = General.carouselItem(this.titles[0], this.captionTitles[0], this.captions[0]);
+        firstItem.classList.add("active");
+        carouselItemContainer.appendChild(firstItem);
+        for(let i = 1; i < carouselLength; i++){
+            carouselItemContainer.appendChild(General.carouselItem(this.titles[i], this.captionTitles[i], this.captions[i]));
+        }
+        carouselContainer.appendChild(indicatorContainer);
+        carouselContainer.appendChild(carouselItemContainer);
+        General.addCarouselControlButtons(carouselContainer);
+        return carouselContainer;
     }
 }

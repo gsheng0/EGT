@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import {General} from "./util.js";
+import {Carousel, General} from "./util.js";
 import {FieldInformation, Template, TemplateBody} from "./template.js";
 
 const title = document.getElementById("title");
@@ -127,27 +127,4 @@ function cleanContentContainer(){
     contentContainer.appendChild(rowContainer);
 }
 
-//setupHomePage();
-
-function makeCarousel(){
-    let carouselContainer = General.carouselContainer();
-    let indicatorContainer = General.carouselIndicatorContainer();
-    let id = "indicator-container";
-    indicatorContainer.id = id;
-    let firstIndicator = General.carouselIndicatorButton(id, 0);
-    firstIndicator.classList.add("active");
-    indicatorContainer.appendChild(firstIndicator);
-    for(let i = 1; i < 3; i++){
-        indicatorContainer.appendChild(General.carouselIndicatorButton(id, i));
-    }
-    let carouselItemContainer = General.carouselItemContainer();
-    for(let i = 0; i < 3; i++){
-        carouselItemContainer.appendChild(General.carouselItem("Slide " + (i + 1), "This is the caption for slide " + (i + 1), "These are some words"));
-    }
-    carouselContainer.appendChild(indicatorContainer);
-    carouselContainer.appendChild(carouselItemContainer);
-    contentContainer.appendChild(carouselContainer);
-}
-
-contentContainer.removeChild(rowContainer);
-makeCarousel();
+setupHomePage();

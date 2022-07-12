@@ -1,5 +1,4 @@
 export class FieldInformation{
-
     //id: Field Id/name
     //sortOrder: integer
     //question: the string containing the question to be used to prompt the user
@@ -105,8 +104,4 @@ export class TemplateBody{
 
         
     }
-
-
-
-    
 }
