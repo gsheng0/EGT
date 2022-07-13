@@ -28,10 +28,10 @@ function setupHomePage(){
     configFileInputElement.onchange = function(event){
         const reader = new FileReader();
         reader.onload = function(){
+        
             setupTemplateList(JSON.parse(reader.result));
         }
         reader.readAsText(configFileInputElement.files[0]);
-        configFile = configFileInputElement.files[0];
     }
 
     title.textContent = "Home";
@@ -55,41 +55,16 @@ function setupPreviewPage(){
     leftContainer.appendChild(General.textElement("h3", "Preview Page"));
 }
 
-//function called as soon as the user selects a template file to use
-//puts a bunch of text boxes and labels into the left container
-//a preview in the right container
-function loadTemplate1(textContent){
-    for(let i = 0; i < 2; i++){
-    leftContainer.appendChild(General.lineBreak());}
-
-    let template = new TemplateBody(textContent);
-    let textBoxes = [];
-    for(let i = 0; i < template.fields.length; i++){
-        let textBox = General.textInputElement("");
-        textBoxes.push(textBox);
-        let textLabel = General.textElement("h4", template.fields[i]);
-        leftContainer.appendChild(textLabel);
-        leftContainer.appendChild(textBox);
-        leftContainer.appendChild(General.lineBreak());
-    }
-
-    let subjectLine = template.template[0];
-    rightContainer.appendChild(General.textElement("h4", subjectLine));
-    for(let i = 1; i < template.template.length; i++){
-        let line = textContent[i];
-        rightContainer.appendChild(General.textElement("p", line));
-    }
-}
-
 function setupTemplateList(configFileObject){
     console.log(configFileObject);
     let templateList = configFileObject.templates;
 
     for(let i = 0; i < templateList.length; i++){
-        let template = templateList[i];
-        let templateTextElement = General.buttonElement(template.title);
+        console.log("Setting up template list");
+        let obj = templateList[i];
+        let templateTextElement = General.buttonElement(obj.title);
         templateTextElement.addEventListener("click", function(){
-            console.log("Clicked");
+            let template = new Template(obj.id, obj.title, obj.desc, obj.questions, new TemplateBody(obj.body.split("\n")))
             setupCreatePage(template);
         }); 
         contentContainer.appendChild(templateTextElement);
@@ -101,6 +76,7 @@ function setupTemplateList(configFileObject){
 
 //template: an object of class Template
 function loadTemplate(template){
+    console.log("Loading template");
     for(let i = 0; i < 2; i++){
         leftContainer.appendChild(General.lineBreak());
     }
@@ -114,12 +90,38 @@ function loadTemplate(template){
         if(question.inputType.valueOf() == "textarea".valueOf()){
             questionInputElement = General.textAreaInputElement("");
         }
+        
         questionInputElements.push(questionInputElement);
         leftContainer.appendChild(label);
         leftContainer.appendChild(questionInputElement);
         leftContainer.appendChild(General.lineBreak());
     }
 
+    for(let i = 0; i < questionInputElements.length; i++){
+        let element = questionInputElements[i];
+        element.onchange = function(event){
+            console.log("Change detected in input " + i);
+            let replacements = [];
+            for(let x = 0; x < questionInputElements.length; x++){
+                replacements.push(questionInputElements[x].value);
+            }
+            writePreview(template.body.fillInTextFields(replacements));
+        };
+    }
+    writePreview(template.body.fillInTextFields([]));
+
+}
+
+//emailLines: list of strings
+//first line should be the subject line
+//clears the right container and adds the writes the given email into the right container
+function writePreview(emailLines){
+    console.log("Writing Preview: " + emailLines);
+    General.clearElement(rightContainer);
+    rightContainer.appendChild(General.textElement("h3", emailLines[0]));
+    for(let i = 1; i < emailLines.length; i++){
+        rightContainer.appendChild(General.textElement("p", emailLines[i]));
+    }
 }
 
 function cleanContentContainer(){

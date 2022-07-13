@@ -96,6 +96,9 @@ export class TemplateBody{
         for(let index = 0; index < this.template.length; index++){
             let line = this.template[index];
             for(let i = 0; i < Math.min(replacements.length, this.fields.length); i++){
+                if(replacements[i].valueOf() === "".valueOf()){
+                    break;
+                }
                 line = line.replaceAll("{" + this.fields[i] + "}", replacements[i]);
             }
             output.push(line);
