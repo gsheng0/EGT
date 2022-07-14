@@ -28,14 +28,12 @@ function setupHomePage(){
     configFileInputElement.onchange = function(event){
         const reader = new FileReader();
         reader.onload = function(){
-        
             setupTemplateList(JSON.parse(reader.result));
         }
         reader.readAsText(configFileInputElement.files[0]);
     }
 
     title.textContent = "Home";
-    
 }
 
 function setupCreatePage(template){
@@ -56,11 +54,9 @@ function setupPreviewPage(){
 }
 
 function setupTemplateList(configFileObject){
-    console.log(configFileObject);
     let templateList = configFileObject.templates;
 
     for(let i = 0; i < templateList.length; i++){
-        console.log("Setting up template list");
         let obj = templateList[i];
         let templateTextElement = General.buttonElement(obj.title);
         templateTextElement.addEventListener("click", function(){
@@ -68,15 +64,12 @@ function setupTemplateList(configFileObject){
             setupCreatePage(template);
         }); 
         contentContainer.appendChild(templateTextElement);
-
-        
     }
 }
 
 
 //template: an object of class Template
 function loadTemplate(template){
-    console.log("Loading template");
     for(let i = 0; i < 2; i++){
         leftContainer.appendChild(General.lineBreak());
     }
@@ -100,28 +93,41 @@ function loadTemplate(template){
     for(let i = 0; i < questionInputElements.length; i++){
         let element = questionInputElements[i];
         element.onchange = function(event){
-            console.log("Change detected in input " + i);
             let replacements = [];
             for(let x = 0; x < questionInputElements.length; x++){
                 replacements.push(questionInputElements[x].value);
             }
-            writePreview(template.body.fillInTextFields(replacements));
+            writePreview(template.body.fillInTextFields(replacements), template.title);
         };
     }
-    writePreview(template.body.fillInTextFields([]));
-
+    writePreview(template.body.fillInTextFields([]), template.title);
 }
 
+//title: string; title of the email
 //emailLines: list of strings
 //first line should be the subject line
 //clears the right container and adds the writes the given email into the right container
-function writePreview(emailLines){
-    console.log("Writing Preview: " + emailLines);
-    General.clearElement(rightContainer);
-    rightContainer.appendChild(General.textElement("h3", emailLines[0]));
-    for(let i = 1; i < emailLines.length; i++){
+function writePreview(emailLines, title){
+    General.clearElementById("right-container");
+    rightContainer.appendChild(General.textElement("h3", title));
+    for(let i = 0; i < emailLines.length; i++){
         rightContainer.appendChild(General.textElement("p", emailLines[i]));
     }
+    let emailBody = "";
+    for(let i = 0; i < emailLines.length; i++){
+        emailBody += emailLines[i];
+    }
+
+    let copyButton = General.buttonElement("Copy Email");
+    copyButton.addEventListener("click", function(){
+        let textInput = General.textInputElement(emailBody);
+        textInput.select();
+        textInput.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(textInput.value);
+        alert("Copied Text: " + textInput.value);
+    });
+    rightContainer.appendChild(copyButton);
+
 }
 
 function cleanContentContainer(){

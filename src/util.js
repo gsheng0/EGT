@@ -112,9 +112,7 @@ export class General{
     }
 
     static clearElement(element){
-        while(element.firstChild){
-            element.remove(element.firstChild);
-        }
+        this.clearElementById(element.id);
     }
 
     static containerElement(classList){
@@ -127,6 +125,7 @@ export class General{
         let input = document.createElement("input");
         input.classList.add("form-control");
         input.placeholder = placeHolder;
+        input.value = placeHolder;
         return input;
     }
 
@@ -134,6 +133,7 @@ export class General{
         let input = document.createElement("textarea");
         input.classList.add("form-control");
         input.placeHolder = placeHolder;
+        input.style = "resize: none";
         return input;
     }
 

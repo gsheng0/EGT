@@ -104,7 +104,5 @@ export class TemplateBody{
             output.push(line);
         }
         return output;
-
-        
     }
 }
