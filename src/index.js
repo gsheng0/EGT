@@ -55,16 +55,23 @@ function setupPreviewPage(){
 
 function setupTemplateList(configFileObject){
     let templateList = configFileObject.templates;
+    let titles = [];
+    let descriptions = [];
 
     for(let i = 0; i < templateList.length; i++){
+
         let obj = templateList[i];
         let templateTextElement = General.buttonElement(obj.title);
+        titles.push(obj.title);
+        descriptions.push(obj.desc);
         templateTextElement.addEventListener("click", function(){
             let template = new Template(obj.id, obj.title, obj.desc, obj.questions, new TemplateBody(obj.body.split("\n")))
             setupCreatePage(template);
         }); 
         contentContainer.appendChild(templateTextElement);
     }
+    let carousel = new Carousel(titles, descriptions, descriptions);
+    contentContainer.appendChild(carousel.makeCarousel("carousel-container"));
 }
 
 
@@ -135,4 +142,4 @@ function cleanContentContainer(){
     contentContainer.appendChild(rowContainer);
 }
 
-setupHomePage();
+//setupHomePage();

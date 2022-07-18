@@ -22,6 +22,10 @@ export class General{
     static carouselItem(title, captionTitle, caption){
         let container = document.createElement("div");
         container.classList.add("carousel-item");
+        let randomText = General.textElement("h5", "Random text");
+        randomText.classList.add("d-block");
+        randomText.classList.add("w-100");
+        container.appendChild(randomText);
         container.appendChild(General.carouselItemTitle(title));
         container.appendChild(General.carouselItemCaption(captionTitle, caption));
         return container;
