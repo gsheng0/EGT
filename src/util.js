@@ -5,6 +5,7 @@ export class General{
         }
     }
 
+    //creates the overarching carousel div container
     static carouselContainer(){
         let container = document.createElement("div");
         container.classList.add("carousel");
@@ -13,24 +14,26 @@ export class General{
         return container;
     }
 
+    //creates the container for all the different carousel items
     static carouselItemContainer(){
         let container = document.createElement("div");
         container.classList.add("carousel-inner");
         return container;
     }
 
+    //creates the contents inside the carousel item
+    //that includes the title, caption title, and the caption
+    //alternatives can be used in order to further customize the carousel item
     static carouselItem(title, captionTitle, caption){
         let container = document.createElement("div");
         container.classList.add("carousel-item");
-        let randomText = General.textElement("h5", "Random text");
-        randomText.classList.add("d-block");
-        randomText.classList.add("w-100");
-        container.appendChild(randomText);
         container.appendChild(General.carouselItemTitle(title));
         container.appendChild(General.carouselItemCaption(captionTitle, caption));
         return container;
     }
 
+    //creates the container for the title of the carousel item
+    //this should also be where all the body of the silde is put, if necessary
     static carouselItemTitle(title){
         let container = document.createElement("div");
         container.classList.add("container");
@@ -43,6 +46,8 @@ export class General{
         return container;
     }
 
+    //creates the container for the caption of the carousel item
+    //this is located near the bottom of the slide, right above the indicators
     static carouselItemCaption(captionTitle, caption){
         let container = document.createElement("div");
         container.classList.add("carousel-caption");
@@ -54,12 +59,14 @@ export class General{
         return container;
     }
 
+    //creates the container for the indicator elements
     static carouselIndicatorContainer(){
         let container = document.createElement("div");
         container.classList.add("carousel-indicators");
         return container;
     }
 
+    //creates the carousel indicator buttons
     static carouselIndicatorButton(carouselIndicatorContainerId, itemIndex){
         let button = document.createElement("button");
         button.type = "button";
@@ -68,6 +75,7 @@ export class General{
         return button;
     }
 
+    //given a carousel container, adds the buttons on the side that allow the user to go to the previous or next slide
     static addCarouselControlButtons(carouselContainer){
         let previousButton = document.createElement("button");
         let nextButton = document.createElement("button");
@@ -271,5 +279,69 @@ export class Carousel{
         carouselContainer.appendChild(carouselItemContainer);
         General.addCarouselControlButtons(carouselContainer);
         return carouselContainer;
+    }
+
+    //returns a container containg a carousel, made with the given carousel slides
+    //id: string
+    //slides: list of carouselSlides
+    //
+    static makeCarouselFromCarouselSlides(id, slides, itemEventListeners){
+        let carouselLength = slides.length;
+        if(carouselLength < 1){
+            let out = document.createElement("div");
+            out.id = id;
+            return out;
+        }
+
+        let carouselContainer = General.carouselContainer();
+        carouselContainer.id = id;
+        let indicatorContainer = General.carouselIndicatorContainer();
+        indicatorContainer.id = "indicator-container";
+
+        let firstIndicator = General.carouselIndicatorButton(id, 0);
+        firstIndicator.classList.add("active");
+        indicatorContainer.appendChild(firstIndicator);
+        for(let i = 1; i < carouselLength; i++){
+            indicatorContainer.appendChild(General.carouselIndicatorButton(id, i));
+        }
+
+        let carouselItemContainer = General.carouselItemContainer();
+        
+        for(let i = 0; i < slides.length; i++){
+            let itemContainer = document.createElement("div");
+            itemContainer.addEventListener("dblclick", itemEventListeners[i]);
+            itemContainer.classList.add("carousel-item");
+            let titleContainer = General.carouselItemTitle(slides[i].title);
+            titleContainer.appendChild(General.lineBreak());
+            for(let x = 0; x < slides[i].body.length; x++){
+                let text = General.textElement("p", slides[i].body[x]);
+                text.style = "margin-left: 50px";
+                titleContainer.appendChild(text);
+            }
+            itemContainer.appendChild(titleContainer);
+            itemContainer.appendChild(General.carouselItemCaption(slides[i].caption, ""));
+            carouselItemContainer.appendChild(itemContainer);
+            if(i === 0){
+                itemContainer.classList.add("active");
+            }
+        }
+        carouselContainer.appendChild(indicatorContainer);
+        carouselContainer.appendChild(carouselItemContainer);
+        General.addCarouselControlButtons(carouselContainer);
+        return carouselContainer;
+
+
+    }
+}
+
+export class CarouselSlide{
+
+    //title: string
+    //body: list of strings
+    //caption: string
+    constructor(title, body, caption){
+        this.title = title;
+        this.body = body;
+        this.caption = caption;
     }
 }

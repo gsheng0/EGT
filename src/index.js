@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import {Carousel, General} from "./util.js";
+import {Carousel, CarouselSlide, General} from "./util.js";
 import {FieldInformation, Template, TemplateBody} from "./template.js";
 
 const title = document.getElementById("title");
@@ -34,6 +34,16 @@ function setupHomePage(){
     }
 
     title.textContent = "Home";
+
+    let slides = [];
+    for(let i = 0; i < 5; i++){
+        let slide = new CarouselSlide("Slide " + i, [], "This is the caption for slide " + i);
+        for(let x = 0; x < 3; x++){
+            slide.body.push("This is question " + x + " for slide " + i + "?");
+        }
+        slides.push(slide);
+    }
+    //contentContainer.appendChild(Carousel.makeCarouselFromCarouselSlides("carouselContainer", slides));
 }
 
 function setupCreatePage(template){
@@ -55,23 +65,23 @@ function setupPreviewPage(){
 
 function setupTemplateList(configFileObject){
     let templateList = configFileObject.templates;
-    let titles = [];
-    let descriptions = [];
-
+    let slides = [];
+    let eventListeners = [];
     for(let i = 0; i < templateList.length; i++){
-
         let obj = templateList[i];
-        let templateTextElement = General.buttonElement(obj.title);
-        titles.push(obj.title);
-        descriptions.push(obj.desc);
-        templateTextElement.addEventListener("click", function(){
+        eventListeners.push(function(){
             let template = new Template(obj.id, obj.title, obj.desc, obj.questions, new TemplateBody(obj.body.split("\n")))
             setupCreatePage(template);
         }); 
-        contentContainer.appendChild(templateTextElement);
+        let questions = [];
+        for(let i = 0; i < obj.questions.length; i++){
+            questions.push(obj.questions[i].question);
+        }
+        let slide = new CarouselSlide(obj.title, questions, obj.desc);
+        slides.push(slide);
     }
-    let carousel = new Carousel(titles, descriptions, descriptions);
-    contentContainer.appendChild(carousel.makeCarousel("carousel-container"));
+
+    contentContainer.appendChild(Carousel.makeCarouselFromCarouselSlides("carousel-container", slides, eventListeners));
 }
 
 
@@ -142,4 +152,4 @@ function cleanContentContainer(){
     contentContainer.appendChild(rowContainer);
 }
 
-//setupHomePage();
+setupHomePage();
