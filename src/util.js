@@ -137,7 +137,6 @@ export class General{
         let input = document.createElement("input");
         input.classList.add("form-control");
         input.placeholder = placeHolder;
-        input.value = placeHolder;
         return input;
     }
 
@@ -190,6 +189,18 @@ export class General{
         let listItemElement = document.createElement("li");
         classList.forEach(className => listItemElement.classList.add(className));
         return this.listElement;
+    }
+
+    //returns the a new string modified to have no spaces
+    static filterSpaces(string){
+        let out = "";
+        for(let i = 0; i < string.length; i++){
+            if(string[i] === ' '){
+                continue;
+            }
+            out += string[i];
+        }
+        return out;
     }
 
     static capitalize(string){

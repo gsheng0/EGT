@@ -1,4 +1,6 @@
-export class FieldInformation{
+import {General} from "./util.js";
+
+export class Question{
     //id: Field Id/name
     //sortOrder: integer
     //question: the string containing the question to be used to prompt the user
@@ -7,7 +9,6 @@ export class FieldInformation{
         this.sortOrder = sortOrder;
         this.question = question;
         this.inputType = inputType;
-
     }
 }
 
@@ -33,9 +34,12 @@ export class TemplateBody{
     //template: list of strings representing the email
     //  first line is the subject
     //fields: list of strings representing the fields that can be filled out for the email
+
     constructor(template){
         this.template = template;
+        this.nameEndingCharacters = ["!", ",", ".", " ", ";"];
         this.fields = this.getFieldsFromTemplate(template);
+        
     }
 
     //line: a string representing one line of the template
@@ -43,15 +47,22 @@ export class TemplateBody{
     //returns the name of the next field, if it exsts
     //  returns an empty string otherwise
     getNameOfNextField(line, index){
-        let leftBracketIndex = line.indexOf("{", index);
-        if(leftBracketIndex === -1){
+        let dollarSignIndex = line.indexOf("$", index);
+        if(dollarSignIndex === -1){
             return "";
         }
-        let rightBracketIndex = line.indexOf("}", index);
-        if(rightBracketIndex === -1){
-            return "";
+        let earliest = 100000000;
+        for(let i = 0; i < this.nameEndingCharacters.length; i++){
+            let index1 = line.indexOf(this.nameEndingCharacters[i], dollarSignIndex);
+            if(index1 === -1){
+                continue;
+            }
+            earliest = Math.min(earliest, index1);
         }
-        return line.substring(leftBracketIndex + 1, rightBracketIndex);
+        if(earliest === 100000000){
+            return line.substring(dollarSignIndex + 1);
+        }
+        return line.substring(dollarSignIndex + 1, earliest);
     }
 
     //template: the list of strings received in the constructor that represents the email
@@ -66,7 +77,7 @@ export class TemplateBody{
                 }
             }
         }
-
+        console.log("fields: " + fields);
         return fields;
     }
     
@@ -83,7 +94,7 @@ export class TemplateBody{
             if(!fields.includes(word)){
                 fields.push(word);
             }
-            index = line.indexOf("}", index) + 1;
+            index += word.length + 2;
         }
         return fields;
     }
@@ -91,7 +102,7 @@ export class TemplateBody{
     //replacements: list of strings, same length as "fields"
     //  each element replaces the placeholder of the same index in list "fields"
     //returns list of strings representing the filled in email
-    fillInTextFields(replacements){
+    fillInTextFields1(replacements){
         let output = [];
         for(let index = 0; index < this.template.length; index++){
             let line = this.template[index];
@@ -99,10 +110,43 @@ export class TemplateBody{
                 if(replacements[i].valueOf() === "".valueOf()){
                     break;
                 }
-                line = line.replaceAll("{" + this.fields[i] + "}", replacements[i]);
+                console.log(this.fields[i]);
+                line = line.replaceAll("$" + this.fields[i], replacements[i]);
             }
             output.push(line);
         }
         return output;
+    }
+
+    //replacements: list of strings, same length as "fields"
+    //questions: list of the questions in the template
+    fillInTextFields(replacements, questions){
+         let bodyText = "";
+         for(let i = 0; i < this.template.length; i++){
+             bodyText += this.template[i];
+             bodyText += "\n";
+         }
+         console.log(bodyText);
+         
+         for(let i = 0; i < Math.min(replacements.length, this.fields.length); i++){
+             if(questions[i].inputType.valueOf() === "array".valueOf()){
+                 //need to split answer by commas
+                 let arr = General.filterSpaces(replacements[i]).split(",");
+                 console.log("Arr: " + arr);
+                 let count = 0;
+                 while(bodyText.indexOf("$" + this.fields[i]) !== -1){
+                    console.log("Index of next: " + bodyText.indexOf("$" + this.fields[i]));
+                    bodyText = bodyText.replace("$" + this.fields[i], arr[count]);
+                    count++;
+                    if(count >= arr.length){
+                        count = 0;
+                    }
+                 }
+             }
+             else{
+                bodyText = bodyText.replaceAll("$" + this.fields[i], replacements[i]);
+             }
+         }
+         return bodyText.split("\n");
     }
 }

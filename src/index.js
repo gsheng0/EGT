@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import {Carousel, CarouselSlide, General} from "./util.js";
-import {FieldInformation, Template, TemplateBody} from "./template.js";
+import {Question, Template, TemplateBody} from "./template.js";
 
 const title = document.getElementById("title");
 const contentContainer = document.getElementById("content-container");
@@ -10,9 +10,6 @@ const rightContainer = document.getElementById("right-container");
 const rowContainer = document.getElementById("row-container");
 
 document.getElementById("home").addEventListener("click", setupHomePage);
-document.getElementById("create").addEventListener("click", setupCreatePage);
-document.getElementById("preview").addEventListener("click", setupPreviewPage);
-
 
 function setupHomePage(){
     General.clearElementById("left-container");
@@ -34,16 +31,6 @@ function setupHomePage(){
     }
 
     title.textContent = "Home";
-
-    let slides = [];
-    for(let i = 0; i < 5; i++){
-        let slide = new CarouselSlide("Slide " + i, [], "This is the caption for slide " + i);
-        for(let x = 0; x < 3; x++){
-            slide.body.push("This is question " + x + " for slide " + i + "?");
-        }
-        slides.push(slide);
-    }
-    //contentContainer.appendChild(Carousel.makeCarouselFromCarouselSlides("carouselContainer", slides));
 }
 
 function setupCreatePage(template){
@@ -96,9 +83,9 @@ function loadTemplate(template){
     for(let i = 0; i < questions.length; i++){
         let question = questions[i];
         let label = General.textElement("h4", question.question);
-        let questionInputElement = General.textInputElement("");
+        let questionInputElement = General.textInputElement(question.id);
         if(question.inputType.valueOf() == "textarea".valueOf()){
-            questionInputElement = General.textAreaInputElement("");
+            questionInputElement = General.textAreaInputElement(question.id);
         }
         
         questionInputElements.push(questionInputElement);
@@ -114,10 +101,10 @@ function loadTemplate(template){
             for(let x = 0; x < questionInputElements.length; x++){
                 replacements.push(questionInputElements[x].value);
             }
-            writePreview(template.body.fillInTextFields(replacements), template.title);
+            writePreview(template.body.fillInTextFields(replacements, template.questions), template.title);
         };
     }
-    writePreview(template.body.fillInTextFields([]), template.title);
+    writePreview(template.body.fillInTextFields([], template.questions), template.title);
 }
 
 //title: string; title of the email
