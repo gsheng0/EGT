@@ -37,7 +37,7 @@ export class TemplateBody{
 
     constructor(template){
         this.template = template;
-        this.nameEndingCharacters = ["!", ",", ".", " ", ";"];
+        this.nameEndingCharacters = ["!", ",", ".", " ", ";", "]", "}"];
         this.fields = this.getFieldsFromTemplate(template);
         
     }
@@ -100,53 +100,88 @@ export class TemplateBody{
     }
 
     //replacements: list of strings, same length as "fields"
-    //  each element replaces the placeholder of the same index in list "fields"
-    //returns list of strings representing the filled in email
-    fillInTextFields1(replacements){
-        let output = [];
-        for(let index = 0; index < this.template.length; index++){
-            let line = this.template[index];
-            for(let i = 0; i < Math.min(replacements.length, this.fields.length); i++){
-                if(replacements[i].valueOf() === "".valueOf()){
-                    break;
-                }
-                console.log(this.fields[i]);
-                line = line.replaceAll("$" + this.fields[i], replacements[i]);
-            }
-            output.push(line);
-        }
-        return output;
-    }
-
-    //replacements: list of strings, same length as "fields"
     //questions: list of the questions in the template
-    fillInTextFields(replacements, questions){
-         let bodyText = "";
-         for(let i = 0; i < this.template.length; i++){
-             bodyText += this.template[i];
-             bodyText += "\n";
-         }
-         console.log(bodyText);
-         
-         for(let i = 0; i < Math.min(replacements.length, this.fields.length); i++){
-             if(questions[i].inputType.valueOf() === "array".valueOf()){
+    //replaces the text fields in the text
+    fillInTextFields(bodyText, replacements, questions){
+         for(let i = 0; i < Math.min(replacements.length, questions.length); i++){
+             let inputType = questions[i].inputType;
+             if(General.stringEquals(replacements[i], "")){
+                 continue;
+             }
+             if(General.stringEquals(inputType, "array")){
                  //need to split answer by commas
                  let arr = General.filterSpaces(replacements[i]).split(",");
-                 console.log("Arr: " + arr);
                  let count = 0;
-                 while(bodyText.indexOf("$" + this.fields[i]) !== -1){
-                    console.log("Index of next: " + bodyText.indexOf("$" + this.fields[i]));
-                    bodyText = bodyText.replace("$" + this.fields[i], arr[count]);
+                 while(bodyText.indexOf("$" + questions[i].id) !== -1){
+                    bodyText = bodyText.replace("$" + questions[i].id, arr[count]);
                     count++;
                     if(count >= arr.length){
                         count = 0;
                     }
                  }
              }
+             else if(General.stringEquals(inputType, "number")){
+                let out = parseInt(General.filterSpaces(replacements[i]));
+                if(isNaN(out)){
+                    out = "";
+                }
+                console.log(out);
+                bodyText = bodyText.replaceAll("$" + questions[i].id, out);
+             }
              else{
-                bodyText = bodyText.replaceAll("$" + this.fields[i], replacements[i]);
+                bodyText = bodyText.replaceAll("$" + questions[i].id, replacements[i]);
              }
          }
          return bodyText.split("\n");
+    }
+
+    //replacements: list of strings, same length as "fields"
+    //questions: list of the questions in the template
+    //multiplies out repeated portions of the email, if necessary
+    fillInTemplate(replacements, questions){
+        let bodyText = "";
+         for(let i = 0; i < this.template.length; i++){
+             bodyText += this.template[i];
+             bodyText += "\n";
+         }
+         if(bodyText.indexOf("{") === -1){
+            return this.fillInTextFields(bodyText, replacements, questions);
+         }
+
+         let index = 0;
+         while(bodyText.indexOf("{", index) !== -1){
+            let leftBraceIndex = bodyText.indexOf("{", index);
+            let rightBraceIndex = bodyText.indexOf("}", leftBraceIndex);
+            index = rightBraceIndex + 1;
+            if(rightBraceIndex === -1){//no more repeat segments left
+                break;
+            }
+            let repeatText = bodyText.substring(leftBraceIndex + 1, rightBraceIndex);
+            let leftBracketIndex = repeatText.indexOf("[");
+            let rightBracketIndex = repeatText.indexOf("]");
+            let repeatCount = 1;
+            if(leftBracketIndex !== -1 && rightBracketIndex !== -1 && leftBracketIndex < rightBracketIndex){//repeat counter is there
+                let field = this.getNameOfNextField(repeatText.substring(leftBracketIndex, rightBracketIndex), 0);
+                let indexOfField = -1;
+                for(let i = 0; i < questions.length; i++){
+                    if(General.stringEquals(field, questions[i].id)){
+                        indexOfField = i;
+                        break;
+                    }
+                }
+                repeatCount = parseInt(replacements[indexOfField]);
+                if(isNaN(repeatCount)){
+                    continue;
+                }
+                repeatText = repeatText.replaceAll(repeatText.substring(leftBracketIndex, rightBracketIndex + 1), "");
+            }
+            let replacer = "";
+            for(let i = 0; i < repeatCount; i++){
+                replacer += repeatText + "\n";
+            }
+            bodyText = bodyText.replace(bodyText.substring(leftBraceIndex, rightBraceIndex + 1), replacer);
+
+         }
+         return this.fillInTextFields(bodyText, replacements, questions);
     }
 }

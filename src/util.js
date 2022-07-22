@@ -203,6 +203,13 @@ export class General{
         return out;
     }
 
+    //a: string
+    //b: string
+    //returns whether a and b are the same string
+    static stringEquals(a, b){
+        return a.valueOf() === b.valueOf();
+    }
+
     static capitalize(string){
         const notCapitalizedList = ["to", "an", "is", "a", "the", "as", "so", "than", "but", "that", "for", "till", "if", "when", "nor", "yet", "once", "or"];
         string = string.trim();

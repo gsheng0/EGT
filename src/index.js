@@ -101,10 +101,10 @@ function loadTemplate(template){
             for(let x = 0; x < questionInputElements.length; x++){
                 replacements.push(questionInputElements[x].value);
             }
-            writePreview(template.body.fillInTextFields(replacements, template.questions), template.title);
+            writePreview(template.body.fillInTemplate(replacements, template.questions), template.title);
         };
     }
-    writePreview(template.body.fillInTextFields([], template.questions), template.title);
+    writePreview(template.body.fillInTemplate([], template.questions), template.title);
 }
 
 //title: string; title of the email
