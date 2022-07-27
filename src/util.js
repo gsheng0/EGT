@@ -303,19 +303,16 @@ export class General{
             let tableRow = document.createElement(tagName);
             let rowContent = text.substring(index, closingTagIndex);
             let rowContentIndex = 0;
-            console.log("Row content: " + rowContent);
 
             while(!General.stringEquals(General.getNextStartingTag(rowContent, rowContentIndex), "")){
                 let columnStartingTag = General.getNextStartingTag(rowContent, rowContentIndex);
                 let columnTagName = columnStartingTag.substring(1, columnStartingTag.length - 1);
-                console.log("Remaining rowContent: " + rowContent.substring(rowContentIndex));
+
                 rowContentIndex = rowContent.indexOf("<" + columnTagName + ">", rowContentIndex) + columnTagName.length + 2;
                 let columnClosingTagIndex = rowContent.indexOf("</" + columnTagName + ">", rowContentIndex);
                 if(columnClosingTagIndex === -1){
                     break;
                 }
-                console.log("Starting index: " + rowContentIndex);
-                console.log("Closing Tag Index: " + columnClosingTagIndex);
 
                 let columnContent = rowContent.substring(rowContentIndex, columnClosingTagIndex);
                 console.log(columnContent);
@@ -327,9 +324,10 @@ export class General{
             
             index = closingTagIndex + tagName.length + 3;
             table.appendChild(tableRow);
+            table.classList.add("table");
             
         }
-        console.log(table);
+        
         
 
         return table;

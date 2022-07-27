@@ -118,6 +118,7 @@ function writePreview(emailLines, title){
     let emailBody = "";
     for(let i = 0; i < emailLines.length; i++){
         emailBody += emailLines[i];
+        rightContainer.appendChild(General.textElement("p", emailLines[i]));
     }
     //need to create a table in a way that mimics html code
     let tableStartTagIndex;
@@ -135,7 +136,7 @@ function cleanContentContainer(){
     contentContainer.appendChild(rowContainer);
 }
 
-//setupHomePage();
-let table = "<table>\n<tr>\n<td>1</td>\n<td>2</td>\n<td>3</td>\n</tr>\n<tr>\n<td>4</td>\n<td>5</td>\n<td>6</td>\n</tr>\n</table>";
-rowContainer.appendChild(General.createTable("<table>\n<tr>\n<td>1</td>\n<td>2</td>\n<td>3</td>\n</tr>\n<tr>\n<td>4</td>\n<td>5</td>\n<td>6</td>\n</tr>\n</table>"));
-contentContainer.appendChild(General.createTable("<table><tr><td>Something</td><td>Else</td><td>IS here</td></tr><tr><td>This second row</td><td>is</td><td>Useless</td></tr></table>"));
+setupHomePage();
+// let table = "<table>\n<tr>\n<td>1</td>\n<td>2</td>\n<td>3</td>\n</tr>\n<tr>\n<td>4</td>\n<td>5</td>\n<td>6</td>\n</tr>\n</table>";
+// rowContainer.appendChild(General.createTable("<table>\n<tr>\n<td>1</td>\n<td>2</td>\n<td>3</td>\n</tr>\n<tr>\n<td>4</td>\n<td>5</td>\n<td>6</td>\n</tr>\n</table>"));
+// contentContainer.appendChild(General.createTable("<table><tr><td>Something</td><td>Else</td><td>IS here</td></tr><tr><td>This second row</td><td>is</td><td>Useless</td></tr></table>"));
