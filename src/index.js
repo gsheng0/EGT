@@ -111,26 +111,22 @@ function loadTemplate(template){
 //emailLines: list of strings
 //first line should be the subject line
 //clears the right container and adds the writes the given email into the right container
-function writePreview(emailLines, title){
+function writePreview(emailLines, title){ 
     General.clearElementById("right-container");
     rightContainer.appendChild(General.textElement("h3", title));
-    for(let i = 0; i < emailLines.length; i++){
-        rightContainer.appendChild(General.textElement("p", emailLines[i]));
-    }
+
     let emailBody = "";
     for(let i = 0; i < emailLines.length; i++){
         emailBody += emailLines[i];
     }
+    //need to create a table in a way that mimics html code
+    let tableStartTagIndex;
+    while((tableStartTagIndex = emailBody.indexOf("<table>")) !== -1){
+        let tableCloseTagIndex = emailBody.indexOf("</table>", tableStartTagIndex);
+        
+    }
 
-    let copyButton = General.buttonElement("Copy Email");
-    copyButton.addEventListener("click", function(){
-        let textInput = General.textInputElement(emailBody);
-        textInput.select();
-        textInput.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(textInput.value);
-        alert("Copied Text: " + textInput.value);
-    });
-    rightContainer.appendChild(copyButton);
+
 
 }
 
@@ -139,4 +135,7 @@ function cleanContentContainer(){
     contentContainer.appendChild(rowContainer);
 }
 
-setupHomePage();
+//setupHomePage();
+let table = "<table>\n<tr>\n<td>1</td>\n<td>2</td>\n<td>3</td>\n</tr>\n<tr>\n<td>4</td>\n<td>5</td>\n<td>6</td>\n</tr>\n</table>";
+rowContainer.appendChild(General.createTable("<table>\n<tr>\n<td>1</td>\n<td>2</td>\n<td>3</td>\n</tr>\n<tr>\n<td>4</td>\n<td>5</td>\n<td>6</td>\n</tr>\n</table>"));
+contentContainer.appendChild(General.createTable("<table><tr><td>Something</td><td>Else</td><td>IS here</td></tr><tr><td>This second row</td><td>is</td><td>Useless</td></tr></table>"));

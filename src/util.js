@@ -239,6 +239,103 @@ export class General{
         return out;
     }
 
+    //returns the next valid looking tag in the form of <[index]>
+    //returns an empty string otherwise
+    static getNextStartingTag(text, index){
+        let startIndex = text.indexOf("<", index);
+        let endIndex = text.indexOf(">", startIndex);
+        if(startIndex === -1 || endIndex === -1){
+            return "";
+        }
+        let tagContent = text.substring(startIndex + 1, endIndex);
+        if(tagContent.indexOf(" ") === -1){
+            return text.substring(startIndex, endIndex + 1);
+        }
+        return "";
+    }
+
+    //returns the next valid looking tag in the form of </[index]>
+    //returns an empty string otherwise
+    static getNextClosingTag(text, index){
+        let startIndex = text.indexOf("</", index);
+        let endIndex = text.indexOf(">", startIndex);
+        if(startIndex === -1 || endIndex === -1){
+            return "";
+        }
+        let tagContent = text.substring(startIndex + 1, endIndex);
+        if(tagContent.indexOf(" ") === -1){
+            return text.substring(startIndex, endIndex + 1);
+        }
+        return "";
+    }
+
+    //creates and returns an html table from the given text
+    //returns null if the table is not valid
+    //text should not contain the <table> tags themselves
+    static createTable(text){
+        // let parser = new DOMParser();
+        // let doc = parser.parseFromString(text, "text/xml");
+        // doc.firstChild.classList.add("table");
+        // return doc.firstChild;
+        //let the code below be a reminder to search for existing functions that can do what you want instead of charging head first into a problem
+        let tableStartTagIndex = text.indexOf("<table>");
+        let tableEndTagIndex = text.indexOf("</table>");
+        if(tableStartTagIndex === -1 || tableEndTagIndex === -1 || tableEndTagIndex < tableStartTagIndex){
+            return null;
+        }
+        text = text.substring(tableStartTagIndex + 7, tableEndTagIndex);
+        let table = document.createElement("table");
+        let currentStartingTag;
+        let index = 0;
+        while(!General.stringEquals(General.getNextStartingTag(text, index), "")){
+            currentStartingTag = General.getNextStartingTag(text, index);
+            let tagName = currentStartingTag.substring(1, currentStartingTag.length - 1);
+            tagName = tagName.toLowerCase();
+            if(!General.stringEquals("tr", tagName)){
+                return null;
+            }
+            index += currentStartingTag.length;
+            let closingTagIndex = text.indexOf("</" + tagName + ">", index);
+
+            if(closingTagIndex === -1){
+                return null;
+            }
+            let tableRow = document.createElement(tagName);
+            let rowContent = text.substring(index, closingTagIndex);
+            let rowContentIndex = 0;
+            console.log("Row content: " + rowContent);
+
+            while(!General.stringEquals(General.getNextStartingTag(rowContent, rowContentIndex), "")){
+                let columnStartingTag = General.getNextStartingTag(rowContent, rowContentIndex);
+                let columnTagName = columnStartingTag.substring(1, columnStartingTag.length - 1);
+                console.log("Remaining rowContent: " + rowContent.substring(rowContentIndex));
+                rowContentIndex = rowContent.indexOf("<" + columnTagName + ">", rowContentIndex) + columnTagName.length + 2;
+                let columnClosingTagIndex = rowContent.indexOf("</" + columnTagName + ">", rowContentIndex);
+                if(columnClosingTagIndex === -1){
+                    break;
+                }
+                console.log("Starting index: " + rowContentIndex);
+                console.log("Closing Tag Index: " + columnClosingTagIndex);
+
+                let columnContent = rowContent.substring(rowContentIndex, columnClosingTagIndex);
+                console.log(columnContent);
+                let columnElement = document.createElement(columnTagName);
+                columnElement.textContent = columnContent;
+                tableRow.appendChild(columnElement);
+                rowContentIndex = columnClosingTagIndex + columnTagName.length + 3;
+            }
+            
+            index = closingTagIndex + tagName.length + 3;
+            table.appendChild(tableRow);
+            
+        }
+        console.log(table);
+        
+
+        return table;
+
+    }
+
     static download(data, filename) {
         let type = "text/plain";
         var file = new Blob([data], {type: type});
