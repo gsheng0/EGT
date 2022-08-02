@@ -8,8 +8,12 @@ const contentContainer = document.getElementById("content-container");
 const leftContainer = document.getElementById("left-container");
 const rightContainer = document.getElementById("right-container");
 const rowContainer = document.getElementById("row-container");
+var configFileTextContent = null;
+var configFile = null;
+var questionIndex = 1;
 
 document.getElementById("home").addEventListener("click", setupHomePage);
+document.getElementById("create").addEventListener("click", setupCreatePage);
 
 function setupHomePage(){
     General.clearElementById("left-container");
@@ -21,34 +25,92 @@ function setupHomePage(){
     contentContainer.appendChild(General.textElement("h3", "Home Page"));
     contentContainer.appendChild(configFileInputElement);
     contentContainer.appendChild(rowContainer);
+    title.textContent = "Home";
+
+    if(configFileTextContent !== null){
+        setupTemplateList(JSON.parse(configFileTextContent));
+        return;
+    }
 
     configFileInputElement.onchange = function(event){
         const reader = new FileReader();
         reader.onload = function(){
+            configFileTextContent = reader.result;
+            console.log("file content: " + configFileTextContent);
             setupTemplateList(JSON.parse(reader.result));
         }
+        configFile = configFileInputElement.files[0];
         reader.readAsText(configFileInputElement.files[0]);
     }
 
-    title.textContent = "Home";
+    
 }
+/*
+if(configFile !== null){
+    const reader = new FileReader();
+    reader.onload = function(){
+        console.log(reader.result);
+    }
+    reader.readAsText(configFile);
+}*/
 
-function setupCreatePage(template){
+function setupCreatePage(){
+    let titleTextField = General.textInputElement("Title");
+    questionIndex = 1;
+
     General.clearElementById("left-container");
     General.clearElementById("right-container");
     cleanContentContainer();
+    contentContainer.removeChild(rowContainer);
+    contentContainer.appendChild(General.textElement("h3", "Create Page"));
+    contentContainer.appendChild(rowContainer);
+
+    rightContainer.appendChild(General.lineBreak());
+    rightContainer.appendChild(General.textElement("h4", "Title"));
+    rightContainer.appendChild(titleTextField);
+
+    leftContainer.appendChild(createQuestionSet(questionIndex));
+    questionIndex++;
+    let addQuestionButton = General.buttonElement("Add Another Question");
+    addQuestionButton.onclick = function(event){
+        leftContainer.removeChild(addQuestionButton);
+        leftContainer.appendChild(General.lineBreak());
+        leftContainer.appendChild(createQuestionSet(questionIndex))
+        questionIndex++;
+        leftContainer.appendChild(addQuestionButton);
+        addQuestionButton.scrollIntoView();
+    };
+    leftContainer.appendChild(addQuestionButton);
+}
+
+function createQuestionSet(index){
+    let container = General.containerElement([]);
+    container.appendChild(General.textElement("h4", "Question " + index));
+
+    container.appendChild(General.textElement("h6", "Variable Name"));
+    container.appendChild(General.textInputElement("Variable Name"));
+    container.appendChild(General.lineBreak());
+
+    container.appendChild(General.textElement("h6", "Question"));
+    container.appendChild(General.textInputElement("Question"));
+    container.appendChild(General.lineBreak());
+
+    container.appendChild(General.textElement("h6", "Input Type"));
+    container.appendChild(General.textInputElement("Input Type"));
+    container.appendChild(General.lineBreak());
+    return container;
+}
+
+function setupWritePage(template){
+    General.clearElementById("left-container");
+    General.clearElementById("right-container");
+    cleanContentContainer();
+    leftContainer.appendChild(General.textElement("h3", "Write Page"));
     title.textContent = "Create";
-    leftContainer.appendChild(General.textElement("h3", "Create Page"));
+    
     loadTemplate(template);
 }
 
-function setupPreviewPage(){
-    General.clearElementById("left-container");
-    General.clearElementById("right-container");
-    cleanContentContainer();
-    title.textContent = "Preview";
-    leftContainer.appendChild(General.textElement("h3", "Preview Page"));
-}
 
 function setupTemplateList(configFileObject){
     let templateList = configFileObject.templates;
@@ -58,7 +120,7 @@ function setupTemplateList(configFileObject){
         let obj = templateList[i];
         eventListeners.push(function(){
             let template = new Template(obj.id, obj.title, obj.desc, obj.questions, new TemplateBody(obj.body.split("\n")))
-            setupCreatePage(template);
+            setupWritePage(template);
         }); 
         let questions = [];
         for(let i = 0; i < obj.questions.length; i++){
