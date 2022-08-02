@@ -271,7 +271,6 @@ export class General{
 
     //creates and returns an html table from the given text
     //returns null if the table is not valid
-    //text should not contain the <table> tags themselves
     static createTable(text){
         // let parser = new DOMParser();
         // let doc = parser.parseFromString(text, "text/xml");

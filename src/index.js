@@ -118,13 +118,19 @@ function writePreview(emailLines, title){
     let emailBody = "";
     for(let i = 0; i < emailLines.length; i++){
         emailBody += emailLines[i];
+        emailBody += "\n";
         rightContainer.appendChild(General.textElement("p", emailLines[i]));
     }
     //need to create a table in a way that mimics html code
     let tableStartTagIndex;
-    while((tableStartTagIndex = emailBody.indexOf("<table>")) !== -1){
+    let index = 0;
+    let tables = [];
+    while((tableStartTagIndex = emailBody.indexOf("<table>", index)) !== -1){
         let tableCloseTagIndex = emailBody.indexOf("</table>", tableStartTagIndex);
-        
+        if(tableCloseTagIndex === -1){
+            break;
+        }
+        tables.push(General.createTable(emailBody.substring(tableStartTagIndex, emailBody.indexOf(">", tableCloseTagIndex) + 1)));
     }
 
 
