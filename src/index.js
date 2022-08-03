@@ -55,6 +55,7 @@ if(configFile !== null){
 }*/
 
 function setupCreatePage(){
+    let containers = [];
     let titleTextField = General.textInputElement("Title");
     questionIndex = 1;
 
@@ -63,19 +64,31 @@ function setupCreatePage(){
     cleanContentContainer();
     contentContainer.removeChild(rowContainer);
     contentContainer.appendChild(General.textElement("h3", "Create Page"));
+    let button = General.buttonElement("BUtton");
+    contentContainer.appendChild(button);
+    button.onclick = function(event){
+        console.log(containers.length);
+        console.log(containers);
+        console.log(extractQuestionFromQuestionSetContainer(containers[0]));
+    }
     contentContainer.appendChild(rowContainer);
 
     rightContainer.appendChild(General.lineBreak());
     rightContainer.appendChild(General.textElement("h4", "Title"));
     rightContainer.appendChild(titleTextField);
 
-    leftContainer.appendChild(createQuestionSet(questionIndex));
+    let container = createQuestionSet(questionIndex);
+    leftContainer.appendChild(container);
+    containers.push(container);
+    
     questionIndex++;
     let addQuestionButton = General.buttonElement("Add Another Question");
     addQuestionButton.onclick = function(event){
         leftContainer.removeChild(addQuestionButton);
         leftContainer.appendChild(General.lineBreak());
-        leftContainer.appendChild(createQuestionSet(questionIndex))
+        let newContainer = createQuestionSet(questionIndex);
+        containers.push(newContainer);
+        leftContainer.appendChild(newContainer)
         questionIndex++;
         leftContainer.appendChild(addQuestionButton);
         addQuestionButton.scrollIntoView();
@@ -83,6 +96,7 @@ function setupCreatePage(){
     leftContainer.appendChild(addQuestionButton);
 }
 
+//creates a container containg input fields to represent a question object
 function createQuestionSet(index){
     let container = General.containerElement([]);
     container.appendChild(General.textElement("h4", "Question " + index));
@@ -98,7 +112,34 @@ function createQuestionSet(index){
     container.appendChild(General.textElement("h6", "Input Type"));
     container.appendChild(General.textInputElement("Input Type"));
     container.appendChild(General.lineBreak());
+
     return container;
+}
+
+//creates a question object using the information given from a container
+//container is in the format used by createQuestionSet() function
+function extractQuestionFromQuestionSetContainer(container, sortOrder){
+    var id, question, inputType;
+    for(let i = 0; i < container.childNodes.length; i++){
+        let child = container.childNodes[i];
+        if(General.stringEquals(child.nodeName, "INPUT")){
+            let name = child.placeholder;
+            if(General.stringEquals("Variable Name", name)){
+                console.log("Name Field:");
+                id = child.value;
+            }
+            else if(General.stringEquals("Question", name)){
+                console.log("Question Field");
+                question = child.value;
+            }
+            else if(General.stringEquals("Input Type", name)){
+                console.log("Input Type Field");
+                inputType = child.value;
+            }
+            
+        }
+    }
+    return new Question(id, sortOrder, question, inputType);
 }
 
 function setupWritePage(template){
