@@ -1,5 +1,35 @@
 /* eslint-disable */
 
+/*
+There are three pages:
+
+Home Page:
+    Choose a config file that contains the data for the different templates
+    Displays those templates
+    Double click a template to begin filling in and writing the email
+        This takes you to the write page
+
+Write Page:
+    Fill in variables to write the email
+    Live display is on the right
+    Can only be accessed through double clicking a template that is displayed on the home page
+
+Create Page:
+    Create a template
+    Add and write questions to use to fill out an email
+    Give the email a 
+        subject, 
+        description (for user only, doesn't show on the actual email), and 
+        body (the email's content)
+    
+    Select a config file to add the template to
+    Or create a new config file
+
+    Download the new modified or created config file
+*/
+
+
+
 import {Carousel, CarouselSlide, General} from "./util.js";
 import {Question, Template, TemplateBody} from "./template.js";
 
@@ -37,6 +67,7 @@ function setupHomePage(){
         contentContainer.appendChild(General.textElement("h3", "Home Page"));
         contentContainer.appendChild(configFileInputElement);
         contentContainer.appendChild(rowContainer);
+
         const reader = new FileReader();
         reader.onload = function(){
             configFileTextContent = reader.result;
@@ -82,14 +113,13 @@ function setupCreatePage(){
 
     addQuestionButton.onclick = function(){
         let newContainer = createQuestionSet(questionIndex);
+        newContainer.appendChild(General.lineBreak());
         questionIndex++;
 
         leftContainer.removeChild(addQuestionButton);
-        leftContainer.appendChild(General.lineBreak());
         questionFormContainers.push(newContainer);
         leftContainer.appendChild(newContainer)
         leftContainer.appendChild(addQuestionButton);
-        leftContainer.appendChild(General.lineBreak());
 
         addQuestionButton.scrollIntoView();
     };
@@ -150,7 +180,22 @@ function setupCreatePage(){
 //creates a container containg input fields to represent a question object
 function createQuestionSet(index){
     let container = General.containerElement([]);
-    container.appendChild(General.textElement("h4", "Question " + index));
+    let titleContainer = document.createElement("div");
+    let titleLabel = General.textElement("h4", "Question " + index);
+    let removeButton = General.buttonElement("Remove Question");
+
+    removeButton.onclick = function(){
+        leftContainer.removeChild(container);
+    }
+    
+    titleLabel.classList.add("col-8");
+    removeButton.classList.add("col-3");
+    removeButton.style = "margin-left: 5px";
+    
+    titleContainer.classList.add("row");
+    titleContainer.appendChild(titleLabel);
+    titleContainer.appendChild(removeButton);
+    container.appendChild(titleContainer);
 
     container.appendChild(General.textElement("h6", "Variable Name"));
     container.appendChild(General.textInputElement("Variable Name"));
