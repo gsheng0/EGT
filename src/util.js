@@ -171,7 +171,7 @@ export class General{
     static buttonElement(text){
         let button = document.createElement("button");
         button.classList.add("btn");
-        button.classList.add("btn-outline-success");
+        button.classList.add("btn-outline-primary");
         button.classList.add("my-2");
         button.classList.add("my-sm-0")
         button.textContent = text;

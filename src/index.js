@@ -54,35 +54,40 @@ if(configFile !== null){
     reader.readAsText(configFile);
 }*/
 
-function setupCreatePage(){
-    let containers = [];
-    let titleTextField = General.textInputElement("Title");
-    questionIndex = 1;
 
-    General.clearElementById("left-container");
-    General.clearElementById("right-container");
-    cleanContentContainer();
-    contentContainer.removeChild(rowContainer);
-    contentContainer.appendChild(General.textElement("h3", "Create Page"));
-    let button = General.buttonElement("BUtton");
-    contentContainer.appendChild(button);
-    button.onclick = function(event){
-        console.log(containers.length);
-        console.log(containers);
-        console.log(extractQuestionFromQuestionSetContainer(containers[0]));
-    }
-    contentContainer.appendChild(rowContainer);
-
+function setupRightSideCreatePage(titleField, descriptionField, bodyField, fileInputElement, writeButton){
     rightContainer.appendChild(General.lineBreak());
     rightContainer.appendChild(General.textElement("h4", "Title"));
-    rightContainer.appendChild(titleTextField);
+    rightContainer.appendChild(titleField);
 
+    rightContainer.appendChild(General.lineBreak());
+    rightContainer.appendChild(General.textElement("h4", "Description"));
+    rightContainer.appendChild(descriptionField);
+
+    rightContainer.appendChild(General.lineBreak());
+    rightContainer.appendChild(General.textElement("h4", "Email Body"));
+    rightContainer.appendChild(bodyField);
+
+    rightContainer.appendChild(General.lineBreak());
+    rightContainer.appendChild(General.textElement("h5", "Select File to Write To"));
+    rightContainer.appendChild(fileInputElement);
+
+    rightContainer.appendChild(General.lineBreak());
+    rightContainer.appendChild(General.lineBreak());
+    rightContainer.appendChild(writeButton);
+}
+
+function setupCreatePage(){
+    let containers = [];
+    let titleField = General.textInputElement("Title");
+    let descriptionField = General.textInputElement("Description");
+    let bodyField = General.textAreaElement("Email Body");
     let container = createQuestionSet(questionIndex);
-    leftContainer.appendChild(container);
-    containers.push(container);
-    
-    questionIndex++;
+    let button = General.buttonElement("Button");
+    let fileInputElement = General.fileInputElement();
+    let writeButton = General.buttonElement("Write to File");
     let addQuestionButton = General.buttonElement("Add Another Question");
+
     addQuestionButton.onclick = function(event){
         leftContainer.removeChild(addQuestionButton);
         leftContainer.appendChild(General.lineBreak());
@@ -93,6 +98,40 @@ function setupCreatePage(){
         leftContainer.appendChild(addQuestionButton);
         addQuestionButton.scrollIntoView();
     };
+
+    button.onclick = function(event){
+        console.log(containers.length);
+        console.log(containers);
+        console.log(extractQuestionFromQuestionSetContainer(containers[0]));
+    }
+
+    writeButton.onclick = function(event){
+        let questions = [];
+        for(let i = 0; i < containers.length; i++){
+            let question = extractQuestionFromQuestionSetContainer(containers[i]);
+            question.sortOrder = i + 1;
+            console.log(question);
+            questions.push(question);
+        }
+
+        let title = titleField.value;
+        let desc = descriptionField.value;
+        let template = new Template()
+    }
+    questionIndex = 2;
+    containers.push(container);
+
+    General.clearElementById("left-container");
+    General.clearElementById("right-container");
+    cleanContentContainer();
+
+    contentContainer.removeChild(rowContainer);
+    contentContainer.appendChild(General.textElement("h3", "Create Page"));
+    contentContainer.appendChild(button);
+    contentContainer.appendChild(rowContainer);
+
+    setupRightSideCreatePage(titleField, descriptionField, bodyField, fileInputElement, writeButton);
+    leftContainer.appendChild(container);
     leftContainer.appendChild(addQuestionButton);
 }
 
@@ -125,15 +164,12 @@ function extractQuestionFromQuestionSetContainer(container, sortOrder){
         if(General.stringEquals(child.nodeName, "INPUT")){
             let name = child.placeholder;
             if(General.stringEquals("Variable Name", name)){
-                console.log("Name Field:");
                 id = child.value;
             }
             else if(General.stringEquals("Question", name)){
-                console.log("Question Field");
                 question = child.value;
             }
             else if(General.stringEquals("Input Type", name)){
-                console.log("Input Type Field");
                 inputType = child.value;
             }
             
