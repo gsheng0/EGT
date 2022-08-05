@@ -135,7 +135,7 @@ export class TemplateBody{
                 bodyText = bodyText.replaceAll("$" + questions[i].id, replacements[i]);
              }
          }
-         return bodyText.split("\n");
+         return bodyText;
     }
 
     //replacements: list of strings, same length as "fields"

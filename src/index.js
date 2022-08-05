@@ -28,6 +28,7 @@ Create Page:
     Download the new modified or created config file
 */
 
+//TODO: change array inputs to not remove spaces in answers
 
 
 import {Carousel, CarouselSlide, General} from "./util.js";
@@ -326,28 +327,30 @@ function loadTemplate(template){
 //first line should be the subject line
 //clears the right container and adds the writes the given email into the right container
 //called anytime the user updates any of the variable values to the left of the preview
-function writePreview(emailLines, title){ 
+function writePreview(emailBody, title){ 
     General.clearElementById("right-container");
     rightContainer.appendChild(General.textElement("h3", title));
-
-    let emailBody = "";
+    let sections = [];
+    let emailLines = emailBody.split("\n");
     for(let i = 0; i < emailLines.length; i++){
-        emailBody += emailLines[i];
-        emailBody += "\n";
         rightContainer.appendChild(General.textElement("p", emailLines[i]));
     }
+    
     //need to create a table in a way that mimics html code
-    let tableStartTagIndex;
     let index = 0;
-    let tables = [];
-    while((tableStartTagIndex = emailBody.indexOf("<table>", index)) !== -1){
-        let tableCloseTagIndex = emailBody.indexOf("</table>", tableStartTagIndex);
-        if(tableCloseTagIndex === -1){
-            break;
-        }
-        tables.push(General.createTable(emailBody.substring(tableStartTagIndex, emailBody.indexOf(">", tableCloseTagIndex) + 1)));
-        index = tableCloseTagIndex;
+    while(emailBody.indexOf("<table>", index) !== -1){
+        
     }
+    //puts the last section of the email into the list
+    sections.push(emailBody.substring(index));
+
+    //the structure of the sections list should be:
+    /*
+    even indices: normal email text
+    odd indices: table content
+    */
+
+
 
 
 
