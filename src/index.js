@@ -9,7 +9,6 @@ const leftContainer = document.getElementById("left-container");
 const rightContainer = document.getElementById("right-container");
 const rowContainer = document.getElementById("row-container");
 var configFileTextContent = null;
-var configFile = null;
 var questionIndex = 1;
 
 document.getElementById("home").addEventListener("click", setupHomePage);
@@ -32,28 +31,20 @@ function setupHomePage(){
         return;
     }
 
-    configFileInputElement.onchange = function(event){
+    configFileInputElement.onchange = function(){
+        cleanContentContainer();
+        contentContainer.removeChild(rowContainer);
+        contentContainer.appendChild(General.textElement("h3", "Home Page"));
+        contentContainer.appendChild(configFileInputElement);
+        contentContainer.appendChild(rowContainer);
         const reader = new FileReader();
         reader.onload = function(){
             configFileTextContent = reader.result;
-            console.log("file content: " + configFileTextContent);
             setupTemplateList(JSON.parse(reader.result));
         }
-        configFile = configFileInputElement.files[0];
         reader.readAsText(configFileInputElement.files[0]);
     }
-
-    
 }
-/*
-if(configFile !== null){
-    const reader = new FileReader();
-    reader.onload = function(){
-        console.log(reader.result);
-    }
-    reader.readAsText(configFile);
-}*/
-
 
 function setupRightSideCreatePage(subjectField, descriptionField, bodyField, fileInputElement, writeButton){
     rightContainer.appendChild(General.lineBreak());
@@ -80,38 +71,33 @@ function setupRightSideCreatePage(subjectField, descriptionField, bodyField, fil
 }
 
 function setupCreatePage(){
-    let containers = [];
+    let questionFormContainers = [];
     let subjectField = General.textInputElement("Subject");
     let descriptionField = General.textInputElement("Description");
     let bodyField = General.textAreaElement("Email Body");
     let container = createQuestionSet(questionIndex);
-    let button = General.buttonElement("Button");
     let fileInputElement = General.fileInputElement();
     let writeButton = General.buttonElement("Write");
     let addQuestionButton = General.buttonElement("Add Another Question");
 
-    addQuestionButton.onclick = function(event){
+    addQuestionButton.onclick = function(){
+        let newContainer = createQuestionSet(questionIndex);
+        questionIndex++;
+
         leftContainer.removeChild(addQuestionButton);
         leftContainer.appendChild(General.lineBreak());
-        let newContainer = createQuestionSet(questionIndex);
-        containers.push(newContainer);
+        questionFormContainers.push(newContainer);
         leftContainer.appendChild(newContainer)
-        questionIndex++;
         leftContainer.appendChild(addQuestionButton);
         leftContainer.appendChild(General.lineBreak());
+
         addQuestionButton.scrollIntoView();
     };
 
-    button.onclick = function(event){
-        console.log(containers.length);
-        console.log(containers);
-        console.log(extractQuestionFromQuestionSetContainer(containers[0]));
-    }
-
-    writeButton.onclick = function(event){
+    writeButton.onclick = function(){
         let questions = [];
-        for(let i = 0; i < containers.length; i++){
-            let question = extractQuestionFromQuestionSetContainer(containers[i]);
+        for(let i = 0; i < questionFormContainers.length; i++){
+            let question = extractQuestionFromQuestionSetContainer(questionFormContainers[i]);
             question.sortOrder = i + 1;
             questions.push(question);
         }
@@ -140,12 +126,13 @@ function setupCreatePage(){
             templateList.push(template);
             let obj = {};
             obj.templates = templateList;
+            configFileTextContent = JSON.stringify(obj);
             General.download("config.txt", JSON.stringify(obj));
         }
         reader.readAsText(fileInputElement.files[0]);
     }
     questionIndex = 2;
-    containers.push(container);
+    questionFormContainers.push(container);
 
     General.clearElementById("left-container");
     General.clearElementById("right-container");
@@ -153,7 +140,6 @@ function setupCreatePage(){
 
     contentContainer.removeChild(rowContainer);
     contentContainer.appendChild(General.textElement("h3", "Create Page"));
-    contentContainer.appendChild(button);
     contentContainer.appendChild(rowContainer);
 
     setupRightSideCreatePage(subjectField, descriptionField, bodyField, fileInputElement, writeButton);
@@ -203,17 +189,19 @@ function extractQuestionFromQuestionSetContainer(container, sortOrder){
     return new Question(id, sortOrder, question, inputType);
 }
 
+//Called when the user double clicks one of the slides in the carousel
+//calls other functions to help set up the write page
 function setupWritePage(template){
     General.clearElementById("left-container");
     General.clearElementById("right-container");
     cleanContentContainer();
     leftContainer.appendChild(General.textElement("h3", "Write Page"));
-    title.textContent = "Create";
+    title.textContent = "Write";
     
     loadTemplate(template);
 }
 
-
+//creates the carousel to display the templates in the config file
 function setupTemplateList(configFileObject){
     let templateList = configFileObject.templates;
     let slides = [];
@@ -231,12 +219,12 @@ function setupTemplateList(configFileObject){
         let slide = new CarouselSlide(obj.title, questions, obj.desc);
         slides.push(slide);
     }
-
     contentContainer.appendChild(Carousel.makeCarouselFromCarouselSlides("carousel-container", slides, eventListeners));
 }
 
 
 //template: an object of class Template
+//sets up the write page to allow the user to write the email
 function loadTemplate(template){
     for(let i = 0; i < 2; i++){
         leftContainer.appendChild(General.lineBreak());
@@ -275,6 +263,7 @@ function loadTemplate(template){
 //emailLines: list of strings
 //first line should be the subject line
 //clears the right container and adds the writes the given email into the right container
+//called anytime the user updates any of the variable values to the left of the preview
 function writePreview(emailLines, title){ 
     General.clearElementById("right-container");
     rightContainer.appendChild(General.textElement("h3", title));
@@ -301,6 +290,8 @@ function writePreview(emailLines, title){
 
 }
 
+//clears the screen of all content
+//except for the top bar
 function cleanContentContainer(){
     General.clearElementById("content-container");
     contentContainer.appendChild(rowContainer);
