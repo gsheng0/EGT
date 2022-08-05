@@ -339,7 +339,7 @@ export class General{
                 }
 
                 let columnContent = rowContent.substring(rowContentIndex, columnClosingTagIndex);
-                console.log(columnContent);
+
                 let columnElement = document.createElement(columnTagName);
                 columnElement.textContent = columnContent;
                 tableRow.appendChild(columnElement);

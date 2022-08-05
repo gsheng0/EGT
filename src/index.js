@@ -77,6 +77,9 @@ function setupHomePage(){
     }
 }
 
+//sets up the fields for the right side of the create page
+//includes the subject field, description field, email body field
+//the file input field for adding onto a list of templates, and the write button
 function setupRightSideCreatePage(subjectField, descriptionField, bodyField, fileInputElement, writeButton){
     rightContainer.appendChild(General.lineBreak());
     rightContainer.appendChild(General.textElement("h4", "Subject"));
@@ -102,6 +105,7 @@ function setupRightSideCreatePage(subjectField, descriptionField, bodyField, fil
 }
 
 function setupCreatePage(){
+    questionIndex = 1;
     let questionFormContainers = [];
     let subjectField = General.textInputElement("Subject");
     let descriptionField = General.textInputElement("Description");
@@ -110,6 +114,22 @@ function setupCreatePage(){
     let fileInputElement = General.fileInputElement();
     let writeButton = General.buttonElement("Write");
     let addQuestionButton = General.buttonElement("Add Another Question");
+
+    //changes the tab key behavior in the text area field to tab, instead of switching between elements
+    bodyField.addEventListener("keydown", (e) => {
+        if(e.key === 'Tab'){
+            e.preventDefault();
+            var start = bodyField.selectionStart;
+            var end = bodyField.selectionEnd;
+        
+            bodyField.value = bodyField.value.substring(0, start) +
+              "\t" + bodyField.value.substring(end);
+        
+            bodyField.selectionStart =
+              bodyField.selectionEnd = start + 1;
+        }
+        console.log("In the event listener");
+    });
 
     addQuestionButton.onclick = function(){
         let newContainer = createQuestionSet(questionIndex);
@@ -126,18 +146,15 @@ function setupCreatePage(){
 
     writeButton.onclick = function(){
         let questions = [];
+        let title = subjectField.value;
+        let desc = descriptionField.value;
+        let body = bodyField.value;
+        let template = new Template(1, title, desc, questions, body);
         for(let i = 0; i < questionFormContainers.length; i++){
             let question = extractQuestionFromQuestionSetContainer(questionFormContainers[i]);
             question.sortOrder = i + 1;
             questions.push(question);
         }
-
-        console.log(questions);
-
-        let title = subjectField.value;
-        let desc = descriptionField.value;
-        let body = bodyField.value;
-        let template = new Template(1, title, desc, questions, body);
 
         if(fileInputElement.files.length < 1){
             let obj = {};
@@ -329,6 +346,7 @@ function writePreview(emailLines, title){
             break;
         }
         tables.push(General.createTable(emailBody.substring(tableStartTagIndex, emailBody.indexOf(">", tableCloseTagIndex) + 1)));
+        index = tableCloseTagIndex;
     }
 
 
