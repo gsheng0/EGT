@@ -1,15 +1,18 @@
 import {General} from "./util.js";
 
 export class Question{
-    //id: Field Id/name
+    //id: Field Id/name - represents the name of the variable
     //sortOrder: integer
     //question: the string containing the question to be used to prompt the user
+    //inputType: string of values of either:
+    //text, textarea, number, or array
     constructor(id, sortOrder, question, inputType){
         this.id = id;
         this.sortOrder = sortOrder;
         this.question = question;
-        this.inputType = inputType;
+        this.inputType = inputType; 
     }
+
 }
 
 

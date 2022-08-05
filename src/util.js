@@ -163,6 +163,31 @@ export class General{
         return textArea;
     }
 
+    static selectMenu(inputName, inputList){
+        let selectMenu = document.createElement("select");
+        selectMenu.classList.add("form-select");
+        selectMenu.name = inputName;
+        for(let i = 0; i < inputList.length; i++){
+            let option = General.menuOption(inputList[i]);
+            if(i === 0){
+                option.selected = "selected";
+            }
+            selectMenu.appendChild(option);
+        }
+        return selectMenu;
+    }
+
+    static menuOption(value){
+        let option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        return option;
+    }
+
+    static questionInputTypeSelectMenu(){
+        return General.selectMenu("InputType", ["text", "textarea", "number", "array"]);
+    }
+
     static formElement(){
         let form = document.createElement("form");
         return form;
@@ -326,30 +351,21 @@ export class General{
             table.classList.add("table");
             
         }
-        
-        
-
         return table;
 
     }
 
-    static download(data, filename) {
-        let type = "text/plain";
-        var file = new Blob([data], {type: type});
-        if (window.navigator.msSaveOrOpenBlob) // IE10+
-            window.navigator.msSaveOrOpenBlob(file, filename);
-        else { // Others
-            var a = document.createElement("a"),
-                    url = URL.createObjectURL(file);
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function() {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);  
-            }, 0); 
-        }
+    static download(filename, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+    
+        element.style.display = 'none';
+        document.body.appendChild(element);
+    
+        element.click();
+    
+        document.body.removeChild(element);
     }
 }
 

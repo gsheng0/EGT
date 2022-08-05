@@ -55,10 +55,10 @@ if(configFile !== null){
 }*/
 
 
-function setupRightSideCreatePage(titleField, descriptionField, bodyField, fileInputElement, writeButton){
+function setupRightSideCreatePage(subjectField, descriptionField, bodyField, fileInputElement, writeButton){
     rightContainer.appendChild(General.lineBreak());
-    rightContainer.appendChild(General.textElement("h4", "Title"));
-    rightContainer.appendChild(titleField);
+    rightContainer.appendChild(General.textElement("h4", "Subject"));
+    rightContainer.appendChild(subjectField);
 
     rightContainer.appendChild(General.lineBreak());
     rightContainer.appendChild(General.textElement("h4", "Description"));
@@ -69,23 +69,25 @@ function setupRightSideCreatePage(titleField, descriptionField, bodyField, fileI
     rightContainer.appendChild(bodyField);
 
     rightContainer.appendChild(General.lineBreak());
-    rightContainer.appendChild(General.textElement("h5", "Select File to Write To"));
+    rightContainer.appendChild(General.textElement("h5", "Select Existing Template List"));
     rightContainer.appendChild(fileInputElement);
 
     rightContainer.appendChild(General.lineBreak());
     rightContainer.appendChild(General.lineBreak());
     rightContainer.appendChild(writeButton);
+    rightContainer.appendChild(General.lineBreak());
+    rightContainer.appendChild(General.lineBreak());
 }
 
 function setupCreatePage(){
     let containers = [];
-    let titleField = General.textInputElement("Title");
+    let subjectField = General.textInputElement("Subject");
     let descriptionField = General.textInputElement("Description");
     let bodyField = General.textAreaElement("Email Body");
     let container = createQuestionSet(questionIndex);
     let button = General.buttonElement("Button");
     let fileInputElement = General.fileInputElement();
-    let writeButton = General.buttonElement("Write to File");
+    let writeButton = General.buttonElement("Write");
     let addQuestionButton = General.buttonElement("Add Another Question");
 
     addQuestionButton.onclick = function(event){
@@ -96,6 +98,7 @@ function setupCreatePage(){
         leftContainer.appendChild(newContainer)
         questionIndex++;
         leftContainer.appendChild(addQuestionButton);
+        leftContainer.appendChild(General.lineBreak());
         addQuestionButton.scrollIntoView();
     };
 
@@ -110,13 +113,36 @@ function setupCreatePage(){
         for(let i = 0; i < containers.length; i++){
             let question = extractQuestionFromQuestionSetContainer(containers[i]);
             question.sortOrder = i + 1;
-            console.log(question);
             questions.push(question);
         }
 
-        let title = titleField.value;
+        console.log(questions);
+
+        let title = subjectField.value;
         let desc = descriptionField.value;
-        let template = new Template()
+        let body = bodyField.value;
+        let template = new Template(1, title, desc, questions, body);
+
+        if(fileInputElement.files.length < 1){
+            let obj = {};
+            obj.templates = [];
+            obj.templates.push(template);
+            General.download("config.txt", JSON.stringify(obj));
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(){
+            let textContent = reader.result;
+            let templateList = JSON.parse(textContent).templates;
+            let length = templateList.length;
+            template.id = length + 1;
+            templateList.push(template);
+            let obj = {};
+            obj.templates = templateList;
+            General.download("config.txt", JSON.stringify(obj));
+        }
+        reader.readAsText(fileInputElement.files[0]);
     }
     questionIndex = 2;
     containers.push(container);
@@ -130,7 +156,7 @@ function setupCreatePage(){
     contentContainer.appendChild(button);
     contentContainer.appendChild(rowContainer);
 
-    setupRightSideCreatePage(titleField, descriptionField, bodyField, fileInputElement, writeButton);
+    setupRightSideCreatePage(subjectField, descriptionField, bodyField, fileInputElement, writeButton);
     leftContainer.appendChild(container);
     leftContainer.appendChild(addQuestionButton);
 }
@@ -149,7 +175,7 @@ function createQuestionSet(index){
     container.appendChild(General.lineBreak());
 
     container.appendChild(General.textElement("h6", "Input Type"));
-    container.appendChild(General.textInputElement("Input Type"));
+    container.appendChild(General.questionInputTypeSelectMenu());
     container.appendChild(General.lineBreak());
 
     return container;
@@ -169,10 +195,9 @@ function extractQuestionFromQuestionSetContainer(container, sortOrder){
             else if(General.stringEquals("Question", name)){
                 question = child.value;
             }
-            else if(General.stringEquals("Input Type", name)){
-                inputType = child.value;
-            }
-            
+        }
+        else if(General.stringEquals(child.nodeName, "SELECT")){
+            inputType = child.value;
         }
     }
     return new Question(id, sortOrder, question, inputType);
