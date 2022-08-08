@@ -128,7 +128,7 @@ export class TemplateBody{
                 if(isNaN(out)){
                     out = "";
                 }
-                console.log(out);
+
                 bodyText = bodyText.replaceAll("$" + questions[i].id, out);
              }
              else{
@@ -143,48 +143,75 @@ export class TemplateBody{
     //multiplies out repeated portions of the email, if necessary
     fillInTemplate(replacements, questions){
         let bodyText = "";
-         for(let i = 0; i < this.template.length; i++){
-             bodyText += this.template[i];
-             bodyText += "\n";
-         }
-         if(bodyText.indexOf("{") === -1){
-            return this.fillInTextFields(bodyText, replacements, questions);
-         }
+        for(let i = 0; i < this.template.length; i++){
+            bodyText += this.template[i];
+            bodyText += "\n";
+        }
 
-         let index = 0;
-         while(bodyText.indexOf("{", index) !== -1){
+        //if there are no repeat sections, break
+        if(bodyText.indexOf("{") === -1){
+            return this.fillInTextFields(bodyText, replacements, questions);
+        }
+
+        let index = 0;
+        while(bodyText.indexOf("{", index) !== -1){
             let leftBraceIndex = bodyText.indexOf("{", index);
             let rightBraceIndex = bodyText.indexOf("}", leftBraceIndex);
             index = rightBraceIndex + 1;
             if(rightBraceIndex === -1){//no more repeat segments left
                 break;
             }
+            //find the segment of text that is to be repeated
             let repeatText = bodyText.substring(leftBraceIndex + 1, rightBraceIndex);
+
+            //finding the repeat number within the repeated text
+            //syntax for repeat number, assuming repeatText is in the following format:
+            //{repeatText} is: 
+            //[$someVar]
+            //repeated text syntax should look like
+            //{[$someVar] actualRepeatedText}
             let leftBracketIndex = repeatText.indexOf("[");
             let rightBracketIndex = repeatText.indexOf("]");
+
+            //default repeat count is 1
             let repeatCount = 1;
-            if(leftBracketIndex !== -1 && rightBracketIndex !== -1 && leftBracketIndex < rightBracketIndex){//repeat counter is there
+
+            //if repeat counter exists
+            if(leftBracketIndex !== -1 && rightBracketIndex !== -1 && leftBracketIndex < rightBracketIndex){
                 let field = this.getNameOfNextField(repeatText.substring(leftBracketIndex, rightBracketIndex), 0);
-                let indexOfField = -1;
-                for(let i = 0; i < questions.length; i++){
-                    if(General.stringEquals(field, questions[i].id)){
-                        indexOfField = i;
-                        break;
-                    }
+                if(General.stringEquals("", field)){ //the repeat number is not a variable filled in by the user
+                    //setting repeat count to whatever number exists in between the two brackets
+                    repeatCount = parseInt(repeatText.substring(leftBracketIndex, rightBracketIndex));
                 }
-                repeatCount = parseInt(replacements[indexOfField]);
-                if(isNaN(repeatCount)){
+                else{ //if the repeatNumber is a variable that is filled in by the user
+                    let indexOfField = -1;
+                    //finding the index of the field name
+                    for(let i = 0; i < questions.length; i++){
+                        if(General.stringEquals(field, questions[i].id)){
+                            indexOfField = i;
+                            break;
+                        }
+                    }
+
+                    if(indexOfField !== -1){ //if the field has been found
+                        repeatCount = parseInt(replacements[indexOfField]);
+                    }
+                    
+                }
+                if(isNaN(repeatCount)){//if whatever is in the brackets is not a valid number, continue
                     continue;
                 }
-                repeatText = repeatText.replaceAll(repeatText.substring(leftBracketIndex, rightBracketIndex + 1), "");
+                //replace the repeat counter segment with nothing
+                //essentially, get the part of the repeatText that actually has to be repeated
+                repeatText = repeatText.replaceAll(repeatText.substring(leftBracketIndex, rightBracketIndex + 1), "");               
             }
             let replacer = "";
             for(let i = 0; i < repeatCount; i++){
                 replacer += repeatText + "\n";
             }
             bodyText = bodyText.replace(bodyText.substring(leftBraceIndex, rightBraceIndex + 1), replacer);
-
-         }
-         return this.fillInTextFields(bodyText, replacements, questions);
+        }
+        
+        return this.fillInTextFields(bodyText, replacements, questions);
     }
 }

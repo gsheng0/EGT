@@ -57,10 +57,7 @@ function setupHomePage(){
     contentContainer.appendChild(rowContainer);
     title.textContent = "Home";
 
-    if(configFileTextContent !== null){
-        setupTemplateList(JSON.parse(configFileTextContent));
-        return;
-    }
+    
 
     configFileInputElement.onchange = function(){
         cleanContentContainer();
@@ -75,6 +72,10 @@ function setupHomePage(){
             setupTemplateList(JSON.parse(reader.result));
         }
         reader.readAsText(configFileInputElement.files[0]);
+    }
+    if(configFileTextContent !== null){
+        setupTemplateList(JSON.parse(configFileTextContent));
+        return;
     }
 }
 
@@ -331,25 +332,56 @@ function writePreview(emailBody, title){
     General.clearElementById("right-container");
     rightContainer.appendChild(General.textElement("h3", title));
     let sections = [];
-    let emailLines = emailBody.split("\n");
-    for(let i = 0; i < emailLines.length; i++){
-        rightContainer.appendChild(General.textElement("p", emailLines[i]));
-    }
+    console.log(emailBody);
+    //let emailLines = emailBody.split("\n");
+    // for(let i = 0; i < emailLines.length; i++){
+    //     rightContainer.appendChild(General.textElement("p", emailLines[i]));
+    // }
     
     //need to create a table in a way that mimics html code
     let index = 0;
     while(emailBody.indexOf("<table>", index) !== -1){
         
+        let startIndex = emailBody.indexOf("<table>", index);
+        let text = emailBody.substring(index, startIndex);
+        sections.push(text);
+        let endIndex = emailBody.indexOf("</table>", startIndex);
+        if(endIndex === -1){
+            break;
+        }
+        endIndex += "</table>".length;
+        console.log("|" + emailBody.substring(startIndex, endIndex) + "|");
+        index = endIndex;
+        sections.push(emailBody.substring(startIndex, endIndex));
+        
     }
     //puts the last section of the email into the list
     sections.push(emailBody.substring(index));
+
+    console.log("Sections");
+    for(let i = 0; i < sections.length; i++){
+        console.log("Section " + i + ": " + sections[i]);
+    }
+    console.log("Section End");
+    
 
     //the structure of the sections list should be:
     /*
     even indices: normal email text
     odd indices: table content
     */
-
+    for(let i = 0; i < sections.length; i++){
+        console.log("Current Section: " + sections[i]);
+        if(i % 2 == 0){
+            let lines = sections[i].split("\n");
+            for(let x = 0; x < lines.length; x++){
+                rightContainer.appendChild(General.textElement("p", lines[x]));
+            }
+        }
+        else{
+            rightContainer.appendChild(General.createTable(sections[i]));
+        }
+    }
 
 
 
