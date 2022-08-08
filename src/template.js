@@ -109,13 +109,15 @@ export class TemplateBody{
          for(let i = 0; i < Math.min(replacements.length, questions.length); i++){
              let inputType = questions[i].inputType;
              if(General.stringEquals(replacements[i], "")){
+                 //if the user hasn't answered the field, do nothing
                  continue;
              }
              if(General.stringEquals(inputType, "array")){
                  //need to split answer by commas
                  let arr = General.filterSpaces(replacements[i]).split(",");
                  let count = 0;
-                 while(bodyText.indexOf("$" + questions[i].id) !== -1){
+                 //cycle through the array for each instance of the variable
+                 while(bodyText.indexOf("$" + questions[i].id) !== -1){ 
                     bodyText = bodyText.replace("$" + questions[i].id, arr[count]);
                     count++;
                     if(count >= arr.length){
@@ -124,6 +126,7 @@ export class TemplateBody{
                  }
              }
              else if(General.stringEquals(inputType, "number")){
+                 //makes sure the input is a number
                 let out = parseInt(General.filterSpaces(replacements[i]));
                 if(isNaN(out)){
                     out = "";
