@@ -220,6 +220,8 @@ export class TemplateBody{
     //replacements: list of strings, same length as "fields"
     //questions: list of the questions in the template
     //multiplies out repeated portions of the email, if necessary
+    //takes care of nested repeats
+    //and fills in the non repeated variables
     fillInTemplate(replacements, questions){
         let bodyText = "";
         for(let i = 0; i < this.template.length; i++){
@@ -229,8 +231,9 @@ export class TemplateBody{
 
         bodyText = this.parseRepeats(bodyText, replacements, questions);
         let prevBodyText = "";
+        //while the template's repeats cannot be more unpacked
+        //this while loop takes care of nested repeats
         while(!General.stringEquals(bodyText, prevBodyText)){
-            console.log("Iteration: " + bodyText);
             prevBodyText = bodyText;
             bodyText = this.parseRepeats(bodyText, replacements, questions);
         }

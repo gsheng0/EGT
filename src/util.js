@@ -376,9 +376,13 @@ export class General{
             }
             else if(text.charAt(i) === closing){
                 if(openingCount === 0){
+                    //if no other opening parens have been found
+                    //  this index is the right one
                     return i;
                 }
                 else{
+                    //if there have been others found,
+                    //  this index is the closing paren for one of the previous opening parens
                     openingCount--;
                 }
             }
