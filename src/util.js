@@ -355,6 +355,37 @@ export class General{
 
     }
 
+    //text: string
+    //index: integer, the index to start searching at
+    //paren: char, the opening bracket/brace/parentheses you are trying to find the matching closnig one for
+    //returns index of the matching closing character
+    //returns -1 if nothing is found
+    static findMatchingClosingParen(text, index, paren){
+        let closing = '}';
+        if(paren === '('){
+            closing = ')';
+        }
+        else if(paren === '['){
+            closing = ']';
+        }
+
+        let openingCount = 0;
+        for(let i = index; i < text.length; i++){
+            if(text.charAt(i) === paren){
+                openingCount++;
+            }
+            else if(text.charAt(i) === closing){
+                if(openingCount === 0){
+                    return i;
+                }
+                else{
+                    openingCount--;
+                }
+            }
+        }
+        return -1;
+    }
+
     static download(filename, text) {
         var element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));

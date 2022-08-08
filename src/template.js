@@ -138,16 +138,13 @@ export class TemplateBody{
          return bodyText;
     }
 
+    //bodyText: The text of the email
     //replacements: list of strings, same length as "fields"
     //questions: list of the questions in the template
-    //multiplies out repeated portions of the email, if necessary
-    fillInTemplate(replacements, questions){
-        let bodyText = "";
-        for(let i = 0; i < this.template.length; i++){
-            bodyText += this.template[i];
-            bodyText += "\n";
-        }
-
+    //multiplies out repeated sections of the email
+    //if any exist
+    //un-nests one level of any nested repeats
+    parseRepeats(bodyText, replacements, questions){
         //if there are no repeat sections, break
         if(bodyText.indexOf("{") === -1){
             return this.fillInTextFields(bodyText, replacements, questions);
@@ -156,7 +153,8 @@ export class TemplateBody{
         let index = 0;
         while(bodyText.indexOf("{", index) !== -1){
             let leftBraceIndex = bodyText.indexOf("{", index);
-            let rightBraceIndex = bodyText.indexOf("}", leftBraceIndex);
+            let rightBraceIndex = General.findMatchingClosingParen(bodyText, leftBraceIndex + 1, '{');
+
             index = rightBraceIndex + 1;
             if(rightBraceIndex === -1){//no more repeat segments left
                 break;
@@ -201,15 +199,40 @@ export class TemplateBody{
                 if(isNaN(repeatCount)){//if whatever is in the brackets is not a valid number, continue
                     continue;
                 }
-                //replace the repeat counter segment with nothing
+                //clear out the repeat counter segment from the repeatText
                 //essentially, get the part of the repeatText that actually has to be repeated
                 repeatText = repeatText.replaceAll(repeatText.substring(leftBracketIndex, rightBracketIndex + 1), "");               
             }
+
+            //replacer is the variable containing the entire repeated segment of text
             let replacer = "";
             for(let i = 0; i < repeatCount; i++){
                 replacer += repeatText + "\n";
             }
+            //each repeat should be separated by \n for now
+
+            //replace the repeat statement with the repeated text
             bodyText = bodyText.replace(bodyText.substring(leftBraceIndex, rightBraceIndex + 1), replacer);
+        }
+        return bodyText;
+    }
+
+    //replacements: list of strings, same length as "fields"
+    //questions: list of the questions in the template
+    //multiplies out repeated portions of the email, if necessary
+    fillInTemplate(replacements, questions){
+        let bodyText = "";
+        for(let i = 0; i < this.template.length; i++){
+            bodyText += this.template[i];
+            bodyText += "\n";
+        }
+
+        bodyText = this.parseRepeats(bodyText, replacements, questions);
+        let prevBodyText = "";
+        while(!General.stringEquals(bodyText, prevBodyText)){
+            console.log("Iteration: " + bodyText);
+            prevBodyText = bodyText;
+            bodyText = this.parseRepeats(bodyText, replacements, questions);
         }
         
         return this.fillInTextFields(bodyText, replacements, questions);
