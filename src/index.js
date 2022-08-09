@@ -28,9 +28,6 @@ Create Page:
     Download the new modified or created config file
 */
 
-//TODO: change array inputs to not remove spaces in answers
-
-
 import {Carousel, CarouselSlide, General} from "./util.js";
 import {Question, Template, TemplateBody} from "./template.js";
 
@@ -332,20 +329,18 @@ function writePreview(emailBody, title){
     General.clearElementById("right-container");
     rightContainer.appendChild(General.textElement("h3", title));
     let sections = [];
-    console.log(emailBody);
-    //let emailLines = emailBody.split("\n");
-    // for(let i = 0; i < emailLines.length; i++){
-    //     rightContainer.appendChild(General.textElement("p", emailLines[i]));
-    // }
     
     //need to create a table in a way that mimics html code
     let index = 0;
     while(emailBody.indexOf("<table>", index) !== -1){
-        
         let startIndex = emailBody.indexOf("<table>", index);
+
+        //find section of text before the table tag
         let text = emailBody.substring(index, startIndex);
         sections.push(text);
         let endIndex = emailBody.indexOf("</table>", startIndex);
+
+        //needs to be fixed
         if(endIndex === -1){
             break;
         }
@@ -357,28 +352,22 @@ function writePreview(emailBody, title){
     }
     //puts the last section of the email into the list
     sections.push(emailBody.substring(index));
-
-    console.log("Sections");
-    for(let i = 0; i < sections.length; i++){
-        console.log("Section " + i + ": " + sections[i]);
-    }
-    console.log("Section End");
     
-
     //the structure of the sections list should be:
     /*
     even indices: normal email text
     odd indices: table content
     */
     for(let i = 0; i < sections.length; i++){
-        console.log("Current Section: " + sections[i]);
         if(i % 2 == 0){
+            //section is normal text
             let lines = sections[i].split("\n");
             for(let x = 0; x < lines.length; x++){
                 rightContainer.appendChild(General.textElement("p", lines[x]));
             }
         }
         else{
+            //section is table
             rightContainer.appendChild(General.createTable(sections[i]));
         }
     }

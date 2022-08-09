@@ -228,6 +228,17 @@ export class General{
         return out;
     }
 
+    static removeLeadingSpaces(string){
+        let index = 0;
+        for(let i = 0; i < string.length; i++){
+            if(string.charAt(i) !== ' '){
+                index = i;
+                break;
+            }
+        }
+        return string.substring(index);
+    }
+
     //a: string
     //b: string
     //returns whether a and b are the same string
@@ -246,17 +257,21 @@ export class General{
         let out = string.substring(0, 1).toUpperCase() + string.substring(1, endIndex);
         
         let index = string.indexOf(" ") + 1;
-        while(index !== 0){ //while there are still other words left 
+        while(index !== 0){ 
+            //while there are still other words left 
             let endIndex = string.indexOf(" ", index);
             if(endIndex === -1){
+                //if there is no space left, the remaining string is the word
                 endIndex = string.length;
             }
+
+            //identify current word
             let currentWord = string.substring(index, endIndex);
             out += " ";
             if(notCapitalizedList.includes(currentWord)){
                 out += currentWord;
             }
-            else{
+            else{//capitalize the current word and add it to the output string
                 out += currentWord.substring(0, 1).toUpperCase() + currentWord.substring(1);
             }
             index = string.indexOf(" ", index) + 1;

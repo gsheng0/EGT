@@ -114,7 +114,11 @@ export class TemplateBody{
              }
              if(General.stringEquals(inputType, "array")){
                  //need to split answer by commas
-                 let arr = General.filterSpaces(replacements[i]).split(",");
+                 let arr = replacements[i].split(",");
+                 //removing leading spaces
+                 for(let i = 0; i < arr.length; i++){
+                     arr[i] = General.removeLeadingSpaces(arr[i]);
+                 }
                  let count = 0;
                  //cycle through the array for each instance of the variable
                  while(bodyText.indexOf("$" + questions[i].id) !== -1){ 
