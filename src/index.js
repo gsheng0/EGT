@@ -127,7 +127,6 @@ function setupCreatePage(){
             bodyField.selectionStart =
               bodyField.selectionEnd = start + 1;
         }
-        console.log("In the event listener");
     });
 
     addQuestionButton.onclick = function(){

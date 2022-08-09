@@ -181,7 +181,7 @@ export class TemplateBody{
             //default repeat count is 1
             let repeatCount = 1;
 
-            //if repeat counter exists
+            //if repeat parameters exist
             if(leftBracketIndex !== -1 && rightBracketIndex !== -1 && leftBracketIndex < rightBracketIndex){
                 //need to handle repeat parameters, if they exist
                 /*
@@ -191,6 +191,32 @@ export class TemplateBody{
                 param2: the string that will be placed between every repetition of the string
                 if param2 doesn't exist, then it will be implied that param3 doesnt exist, and thus will not be used
                 */
+                let params = repeatText.substring(leftBracketIndex + 1, rightBracketIndex).split(",");
+                console.log(params);
+                
+                //replacing the params with the user provided values
+                for(let i = 0; i < params.length; i++){
+                    let field = this.getNameOfNextField(params[i], 0);
+                    if(General.stringEquals(field, "")){//if there is no field to be filled in
+                        break;
+                    }
+                    
+                    //finding the right field to fill in the variable
+                    let indexOfField = -1;
+                    for(let i = 0; i < questions.length; i++){
+                        if(General.stringEquals(field, questions[i].id)){
+                            indexOfField = i;
+                            break;
+                        }
+                    }
+                    if(indexOfField !== -1){
+                        params[i] = replacements[indexOfField];
+                    }
+                }
+                //first parameter is always a number
+                params[0] = parseInt(params[0]);
+
+                
                 let field = this.getNameOfNextField(repeatText.substring(leftBracketIndex, rightBracketIndex), 0);
                 if(General.stringEquals("", field)){ //the repeat number is not a variable filled in by the user
                     //setting repeat count to whatever number exists in between the two brackets
