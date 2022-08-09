@@ -183,6 +183,14 @@ export class TemplateBody{
 
             //if repeat counter exists
             if(leftBracketIndex !== -1 && rightBracketIndex !== -1 && leftBracketIndex < rightBracketIndex){
+                //need to handle repeat parameters, if they exist
+                /*
+                repeat parameters:
+                {[param1, param2, param3]TEXT_TO_BE_REPEATED}
+                param1: the number of times the text is to be repeated
+                param2: the string that will be placed between every repetition of the string
+                if param2 doesn't exist, then it will be implied that param3 doesnt exist, and thus will not be used
+                */
                 let field = this.getNameOfNextField(repeatText.substring(leftBracketIndex, rightBracketIndex), 0);
                 if(General.stringEquals("", field)){ //the repeat number is not a variable filled in by the user
                     //setting repeat count to whatever number exists in between the two brackets
