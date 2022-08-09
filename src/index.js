@@ -329,9 +329,9 @@ function writePreview(emailBody, title){
     General.clearElementById("right-container");
     rightContainer.appendChild(General.textElement("h3", title));
     let sections = [];
-    
-    //need to create a table in a way that mimics html code
+
     let index = 0;
+    //does not support nested tables
     while(emailBody.indexOf("<table>", index) !== -1){
         let startIndex = emailBody.indexOf("<table>", index);
 
@@ -340,13 +340,18 @@ function writePreview(emailBody, title){
         sections.push(text);
         let endIndex = emailBody.indexOf("</table>", startIndex);
 
-        //needs to be fixed
+        //if there is no matching closing tag:
         if(endIndex === -1){
+            index = startIndex;
+            //adding an empty string to make sure that the next for loop parses the remaining section as string
+            //instead of a table
+            sections.push(""); 
             break;
         }
         endIndex += "</table>".length;
-        console.log("|" + emailBody.substring(startIndex, endIndex) + "|");
+        //moving up the index pointer
         index = endIndex;
+        //adding the stringified table to the array
         sections.push(emailBody.substring(startIndex, endIndex));
         
     }
