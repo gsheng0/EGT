@@ -177,9 +177,8 @@ export class TemplateBody{
             //{[$someVar] actualRepeatedText}
             let leftBracketIndex = repeatText.indexOf("[");
             let rightBracketIndex = repeatText.indexOf("]");
-
-            //default repeat count is 1
-            let repeatCount = 1;
+            var params;
+            
 
             //if repeat parameters exist
             if(leftBracketIndex !== -1 && rightBracketIndex !== -1 && leftBracketIndex < rightBracketIndex){
@@ -189,9 +188,11 @@ export class TemplateBody{
                 {[param1, param2, param3]TEXT_TO_BE_REPEATED}
                 param1: the number of times the text is to be repeated
                 param2: the string that will be placed between every repetition of the string
+                
                 if param2 doesn't exist, then it will be implied that param3 doesnt exist, and thus will not be used
+                params that are supposed to be strings must be inbetween double quotes (")
                 */
-                let params = repeatText.substring(leftBracketIndex + 1, rightBracketIndex).split(",");
+                params = repeatText.substring(leftBracketIndex + 1, rightBracketIndex).split(",");
                 console.log(params);
                 
                 //replacing the params with the user provided values
@@ -213,44 +214,36 @@ export class TemplateBody{
                         params[i] = replacements[indexOfField];
                     }
                 }
+                //params[0] is repeat count
+                //params[1] is the repetition separator
+
                 //first parameter is always a number
                 params[0] = parseInt(params[0]);
+                if(isNaN(params[0])){
+                    params[0] = 1;
+                }
 
-                
-                let field = this.getNameOfNextField(repeatText.substring(leftBracketIndex, rightBracketIndex), 0);
-                if(General.stringEquals("", field)){ //the repeat number is not a variable filled in by the user
-                    //setting repeat count to whatever number exists in between the two brackets
-                    repeatCount = parseInt(repeatText.substring(leftBracketIndex, rightBracketIndex));
+                //second parameter is a string (between double quotes)
+                let firstQuoteIndex = params[1].indexOf("\"");
+                let secondQuoteIndex = params[1].indexOf("\"", firstQuoteIndex)
+                if(firstQuoteIndex === -1 || secondQuoteIndex === -1){
+                    params[1] = "";
                 }
-                else{ //if the repeatNumber is a variable that is filled in by the user
-                    let indexOfField = -1;
-                    //finding the index of the field name
-                    for(let i = 0; i < questions.length; i++){
-                        if(General.stringEquals(field, questions[i].id)){
-                            indexOfField = i;
-                            break;
-                        }
-                    }
+                params[1] = params[1].substring(firstQuoteIndex + 1, secondQuoteIndex);
 
-                    if(indexOfField !== -1){ //if the field has been found
-                        repeatCount = parseInt(replacements[indexOfField]);
-                    }
-                    
-                }
-                if(isNaN(repeatCount)){//if whatever is in the brackets is not a valid number, continue
-                    continue;
-                }
-                //clear out the repeat counter segment from the repeatText
+                //clear out the repeat statement from the repeatText
                 //essentially, get the part of the repeatText that actually has to be repeated
                 repeatText = repeatText.replaceAll(repeatText.substring(leftBracketIndex, rightBracketIndex + 1), "");               
             }
 
             //replacer is the variable containing the entire repeated segment of text
+            //params[0] is the repeat count
+            //params[1] is the seperater string
             let replacer = "";
-            for(let i = 0; i < repeatCount; i++){
-                replacer += repeatText + "\n";
+            for(let i = 0; i < params[0] - 1; i++){
+                replacer += repeatText + params[1];
             }
-            //each repeat should be separated by \n for now
+            replacer += repeatText;
 
             //replace the repeat statement with the repeated text
             bodyText = bodyText.replace(bodyText.substring(leftBraceIndex, rightBraceIndex + 1), replacer);
