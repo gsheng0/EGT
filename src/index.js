@@ -371,7 +371,7 @@ function writePreview(emailBody, title){
             }
         }
         else{
-            //section is table
+            //this section is table
             rightContainer.appendChild(General.createTable(sections[i]));
         }
     }

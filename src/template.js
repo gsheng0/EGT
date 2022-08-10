@@ -40,7 +40,7 @@ export class TemplateBody{
 
     constructor(template){
         this.template = template;
-        this.nameEndingCharacters = ["!", ",", ".", " ", ";", "]", "}"];
+        this.nameEndingCharacters = ["!", ",", ".", " ", ";", "]", "}", "<", "\n"];
         this.fields = this.getFieldsFromTemplate(template);
         
     }
@@ -102,6 +102,51 @@ export class TemplateBody{
         return fields;
     }
 
+    //text: The email body to look through
+    //varName: The name of the variable
+    //returns a list of instances of the variable (including the $), along with the character after the end of the variable
+    //Last character is always an instance of one of the characters from the name ending characters list
+    getInstancesOfVar(text, varName){
+        let out = [];
+        if(varName[0] !== '$'){
+            varName = "$" + varName;
+        }
+        let tracker = []; 
+        //tracks the index of the closest instance of each possible variation of the variable name
+        //variation in this case means $ + varName + any name ending character
+        let remaining = 0;
+        //number of remaing instances of the variable left
+        for(let i = 0; i < this.nameEndingCharacters.length; i++){
+            tracker.push(text.indexOf(varName + this.nameEndingCharacters[i]));
+            if(tracker[i] !== -1){
+                remaining++;
+            }
+        }
+
+        while(remaining > 0){
+            let index = 100000;
+
+            //finds the index of the earliest occurence of the variable
+            for(let i = 0; i < tracker.length; i++){
+                if(tracker[i] === -1){
+                    continue;
+                }
+                if(tracker[i] < index){
+                    index = i;
+                }
+            }
+            //adds the variable to the output list
+            out.push(varName + this.nameEndingCharacters[index]);
+            //finds the next instance of this variation of the variable
+            tracker[index] = text.indexOf(varName + this.nameEndingCharacters[index], tracker[index] + 1);
+            if(tracker[index] === -1){ //if there are no more, decrement the remaining counter
+                remaining--;
+            }
+        }
+        return out;
+
+    }
+
     //replacements: list of strings, same length as "fields"
     //questions: list of the questions in the template
     //replaces the text fields in the text
@@ -120,14 +165,17 @@ export class TemplateBody{
                      arr[i] = General.removeLeadingSpaces(arr[i]);
                  }
                  let count = 0;
+                 let instances = this.getInstancesOfVar(bodyText, questions[i].id);
                  //cycle through the array for each instance of the variable
-                 while(bodyText.indexOf("$" + questions[i].id) !== -1){ 
-                    bodyText = bodyText.replace("$" + questions[i].id, arr[count]);
-                    count++;
-                    if(count >= arr.length){
-                        count = 0;
-                    }
+                 for(let i = 0; i < instances.length; i++){
+                     bodyText = bodyText.replace(instances[i], arr[count] + instances[i][instances[i].length - 1]);
+                     count++;
+                     if(count >= arr.length){
+                         count = 0;
+                     }
                  }
+
+                 
              }
              else if(General.stringEquals(inputType, "number")){
                  //makes sure the input is a number
@@ -135,11 +183,15 @@ export class TemplateBody{
                 if(isNaN(out)){
                     out = "";
                 }
-
-                bodyText = bodyText.replaceAll("$" + questions[i].id, out);
+                for(let x = 0; x < this.nameEndingCharacters.length; x++){
+                    bodyText = bodyText.replaceAll("$" + questions[i].id + this.nameEndingCharacters[x], out + this.nameEndingCharacters[x]);
+                }
              }
              else{
-                bodyText = bodyText.replaceAll("$" + questions[i].id, replacements[i]);
+                for(let x = 0; x < this.nameEndingCharacters.length; x++){
+                    bodyText = bodyText.replaceAll("$" + questions[i].id + this.nameEndingCharacters[x], replacements[i] + this.nameEndingCharacters[x]);
+                }
+                
              }
          }
          return bodyText;
@@ -177,7 +229,7 @@ export class TemplateBody{
             //{[$someVar] actualRepeatedText}
             let leftBracketIndex = repeatText.indexOf("[");
             let rightBracketIndex = repeatText.indexOf("]");
-            var params;
+            var params = null;
             
 
             //if repeat parameters exist
@@ -193,7 +245,6 @@ export class TemplateBody{
                 params that are supposed to be strings must be inbetween double quotes (")
                 */
                 params = repeatText.substring(leftBracketIndex + 1, rightBracketIndex).split(",");
-                console.log(params);
                 
                 //replacing the params with the user provided values
                 for(let i = 0; i < params.length; i++){
@@ -212,6 +263,12 @@ export class TemplateBody{
                     }
                     if(indexOfField !== -1){
                         params[i] = replacements[indexOfField];
+                        if(params[i] === undefined){
+                            params[i] = "";
+                        }
+                        else if(i > 0 && !General.stringEquals("", params[i])){
+                            params[i] = "\"" + params[i] + "\"";
+                        }
                     }
                 }
                 //params[0] is repeat count
@@ -222,15 +279,24 @@ export class TemplateBody{
                 if(isNaN(params[0])){
                     params[0] = 1;
                 }
-
-                //second parameter is a string (between double quotes)
-                let firstQuoteIndex = params[1].indexOf("\"");
-                let secondQuoteIndex = params[1].indexOf("\"", firstQuoteIndex)
-                if(firstQuoteIndex === -1 || secondQuoteIndex === -1){
+                
+                if(params.length > 1){
+                    //second parameter is a string (between double quotes)
+                    let firstQuoteIndex = params[1].indexOf("\"");
+                    let secondQuoteIndex = params[1].indexOf("\"", firstQuoteIndex + 1)
+                    if(firstQuoteIndex === -1 || secondQuoteIndex === -1){
+                        //if there is no valid string
+                        params[1] = "";
+                    }
+                    else{
+                        //string is valid
+                        params[1] = params[1].substring(firstQuoteIndex + 1, secondQuoteIndex);
+                    }
+                }
+                else{
+                    //if not separator variable was provided, use nothing by default
                     params[1] = "";
                 }
-                params[1] = params[1].substring(firstQuoteIndex + 1, secondQuoteIndex);
-
                 //clear out the repeat statement from the repeatText
                 //essentially, get the part of the repeatText that actually has to be repeated
                 repeatText = repeatText.replaceAll(repeatText.substring(leftBracketIndex, rightBracketIndex + 1), "");               
